@@ -1,4 +1,4 @@
-Doodle Quest is an interactive 2D platformer game where the central mechanic involves the player drawing their own character. The game's motto is "Draw. Create. Play."
+**Doodle Quest** is an interactive 2D platformer game where the central mechanic involves the player drawing their own character. The game's motto is "Draw. Create. Play."
 
 The game consists of five unique levels, each with a different objective:
 * Level 1: Collect 15 coins and reach the finish line.
@@ -15,9 +15,11 @@ Key Gameplay Features:
 * Enemies & Hazards: The game features a variety of obstacles, including ground enemies, flying enemies, spikes, moving spike balls, moving platforms, and disappearing platforms.
 * Progression: The game includes checkpoints within levels to save progress.
 * Leaderboard: After completing the final boss, the player's total time is calculated and can be saved to a local top-5 leaderboard.
+
 ## Contributors
 
-This game was developed by:
+This project was a collaborative effort between:
 
-- [AKASH SAI REDDY]((https://github.com/Akashsr30))
-- [ROSHAN H]((https://github.com/CyanRossi))
+- **AKASH SAI REDDY** - [github.com/Akashsr30](https://github.com/Akashsr30)
+- **ROSHAN H** - [github.com/CyanRossi](https://github.com/CyanRossi)
+
