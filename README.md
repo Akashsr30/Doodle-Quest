@@ -1,4 +1,4 @@
-**Doodle Quest** is an interactive 2D platformer game where the central mechanic involves the player drawing their own character. The game's motto is "Draw. Create. Play."
+Doodle Quest is an interactive 2D platformer game where the central mechanic involves the player drawing their own character. The game's motto is "Draw. Create. Play."
 
 The game consists of five unique levels, each with a different objective:
 * Level 1: Collect 15 coins and reach the finish line.
