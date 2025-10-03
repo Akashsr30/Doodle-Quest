@@ -15,3 +15,9 @@ Key Gameplay Features:
 * Enemies & Hazards: The game features a variety of obstacles, including ground enemies, flying enemies, spikes, moving spike balls, moving platforms, and disappearing platforms.
 * Progression: The game includes checkpoints within levels to save progress.
 * Leaderboard: After completing the final boss, the player's total time is calculated and can be saved to a local top-5 leaderboard.
+## Contributors
+
+This game was developed by:
+
+- [AKASH SAI REDDY]((https://github.com/Akashsr30))
+- [ROSHAN H]((https://github.com/CyanRossi))
