@@ -1,0 +1,2655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doodle Quest - The Ultimate Adventure!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive; /* Retro game font */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow: hidden;
+            user-select: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: #f0f0f0; /* Default if canvas is not shown */
+        }
+
+        #welcomeScreen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+        }
+
+        .welcome-content {
+            text-align: center;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .title-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        #welcomeScreen h1 {
+            font-size: 80px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            color: #fff;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.4);
+            font-weight: bold;
+        }
+
+        #welcomeScreen p {
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: #eee;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 30px 0;
+            padding-left: 0;
+        }
+
+        .feature-list li {
+            color: #fff;
+            font-size: 22px;
+            margin: 15px 0;
+            opacity: 0;
+            animation: slideIn 0.5s ease-out forwards;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .feature-list li:nth-child(1) { animation-delay: 0.2s; }
+        .feature-list li:nth-child(2) { animation-delay: 0.4s; }
+        .feature-list li:nth-child(3) { animation-delay: 0.6s; }
+        .feature-list li:nth-child(4) { animation-delay: 0.8s; } /* For new feature */
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        #startButton {
+            padding: 25px 50px;
+            font-size: 32px;
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border-radius: 50px;
+            box-shadow: 0 6px 20px 0 rgba(245, 87, 108, 0.85);
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+        }
+
+        #startButton:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 25px 0 rgba(245, 87, 108, 0.95);
+        }
+
+        #drawingArea {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            z-index: 900;
+        }
+
+        #drawingInstructions {
+            font-size: 38px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+        }
+
+        #drawingCanvas {
+            border: 5px solid #2c3e50;
+            background: #fff;
+            cursor: crosshair;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+            width: 600px;
+            height: 600px;
+        }
+
+        #submitDrawing {
+            padding: 22px 45px;
+            font-size: 26px;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            border-radius: 50px;
+            box-shadow: 0 5px 18px 0 rgba(118, 75, 162, 0.8);
+            transition: all 0.3s;
+        }
+
+        #submitDrawing:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 8px 22px 0 rgba(118, 75, 162, 0.9);
+        }
+
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 60%, #f0f0f0 60%, #f0f0f0 100%); /* Default, overridden by level */
+            display: none;
+        }
+
+        #gameUI {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 100;
+            background: rgba(44, 62, 80, 0.9); /* Darker, more solid background */
+            color: #ecf0f1;
+            padding: 25px 35px;
+            border-radius: 15px;
+            border: 3px solid #34495e;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            display: none;
+            min-width: 380px;
+            text-shadow: none; /* Remove text shadow for UI elements */
+        }
+
+        #gameUI div {
+            margin: 12px 0;
+            color: #ecf0f1;
+            font-size: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #healthBarContainer {
+            width: 100%;
+            height: 25px;
+            background-color: #555;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+            border: 2px solid #ecf0f1;
+        }
+
+        #healthBar {
+            height: 100%;
+            width: 100%; /* Will be set dynamically by JS */
+            background-color: #2ecc71;
+            transition: width 0.3s ease-out;
+            border-radius: 3px;
+        }
+
+        #controlsInfo {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            text-align: center;
+            background: rgba(44, 62, 80, 0.9);
+            color: #ecf0f1;
+            padding: 15px 30px;
+            border-radius: 15px;
+            border: 3px solid #34495e;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            display: none;
+            white-space: nowrap; /* Prevent wrapping */
+            text-shadow: none;
+        }
+
+        #messageBox {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border: 5px solid #2c3e50;
+            padding: 50px;
+            text-align: center;
+            display: none;
+            z-index: 1100;
+            min-width: 550px;
+            border-radius: 25px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+            color: #2c3e50; /* Ensure text is dark on light background */
+            text-shadow: none;
+        }
+
+        #messageBox h2 {
+            font-size: 48px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            color: #2c3e50;
+            letter-spacing: 2px;
+        }
+
+        #messageBox p {
+            font-size: 26px;
+            margin-bottom: 40px;
+            color: #34495e;
+            line-height: 1.4;
+        }
+
+        #messageBox button {
+            padding: 20px 40px;
+            font-size: 22px;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin: 0 12px;
+            text-transform: uppercase;
+            border-radius: 50px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        #messageBox button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        #leaderboard {
+            margin-top: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            padding: 25px 45px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 80%;
+            max-width: 650px;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        #leaderboard h2 {
+            font-size: 40px;
+            color: #fff;
+            margin-bottom: 25px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        #leaderboard ol {
+            list-style: decimal; /* Use numbers for leaderboard */
+            padding-left: 25px;
+        }
+
+        #leaderboard li {
+            font-size: 24px;
+            color: #fff;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        #leaderboard li:last-child {
+            border-bottom: none;
+        }
+
+        #leaderboard li span:first-child {
+            flex-grow: 1;
+            text-align: left;
+        }
+        #leaderboard li span:last-child {
+            width: 100px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        #nameModal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85); /* Darker overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1200;
+        }
+
+        #nameModalContent {
+            background: #f0f0f0; /* Light background for modal */
+            padding: 50px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            color: #2c3e50;
+            text-shadow: none;
+        }
+
+        #nameModalContent h2 {
+            font-size: 36px;
+            margin-bottom: 25px;
+        }
+
+        #nameInput {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 26px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 3px solid #a0a0a0;
+            width: 100%;
+            max-width: 350px;
+            margin-bottom: 30px;
+            text-align: center;
+            background-color: #fff;
+            color: #333;
+            transition: border-color 0.3s;
+        }
+
+        #nameInput:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.3);
+        }
+
+        #submitName {
+            padding: 18px 36px;
+            font-size: 24px;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        #submitName:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        #confettiCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allows clicks/interactions on elements below */
+            z-index: 1050; /* Above game, below message box */
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="welcomeScreen">
+            <div class="welcome-content">
+                <div class="title-container">
+                    <h1>Doodle Quest</h1>
+                    <p>Draw. Create. Play.</p>
+                </div>
+                <ul class="feature-list">
+                    <li>✏️ Draw your own character</li>
+                    <li>❤️ Health System & Potions</li>
+                    <li>👾 Diverse Enemies & Hazards</li>
+                    <li>🏁 5 Challenging Levels & Boss Fight!</li>
+                </ul>
+                <button id="startButton" onclick="promptForName()">Begin Adventure</button>
+            </div>
+            <div id="leaderboard">
+                <h2>Leaderboard</h2>
+                <ol id="leaderboardList"></ol>
+            </div>
+        </div>
+
+        <div id="nameModal" style="display: none;">
+            <div id="nameModalContent">
+                <h2>Enter Your Name</h2>
+                <input type="text" id="nameInput" placeholder="Player Name">
+                <button id="submitName" onclick="startGame()">Start Game</button>
+            </div>
+        </div>
+
+        <div id="drawingArea">
+            <h2 id="drawingInstructions">Draw a Stickman</h2>
+            <canvas id="drawingCanvas" width="600" height="600"></canvas>
+            <button id="submitDrawing" onclick="submitDrawing()">Bring to Life!</button>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+        <canvas id="confettiCanvas"></canvas> <div id="gameUI">
+            <div id="levelDisplay">Level: 1</div>
+            <div id="objectiveDisplay">Collect 15 coins</div>
+            <div id="healthDisplay">
+                Health: <div id="healthBarContainer"><div id="healthBar"></div></div>
+            </div>
+            <div id="coinsDisplay">Coins: 0/15</div>
+            <div id="enemiesDisplay" style="display:none;">Enemies: 0/5</div>
+            <div id="timerDisplay" style="display:none;">Time: 30s</div>
+            <div id="keyDisplay" style="display:none;">Key: Not Found</div>
+            <div id="checkpointsDisplay" style="display:none;">Checkpoint: None</div>
+        </div>
+
+        <div id="controlsInfo">
+            Arrow Keys: Move | Spacebar: Jump | X: Shoot (when gun equipped)
+        </div>
+
+        <div id="messageBox">
+            <h2 id="messageTitle">Congratulations!</h2>
+            <p id="messageText">You completed Level 1!</p>
+            <button id="continueButton" onclick="continueGame()">Continue</button>
+            <button id="retryButton" onclick="retryLevel()">Retry</button>
+            <button id="restartButton" onclick="restartGame()" style="display:none;">Restart Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Variables
+        let currentLevel = 1;
+        let gameState = 'welcome'; // 'welcome', 'drawing', 'playing', 'paused', 'gameover'
+        let player = null;
+        let coins = [];
+        let enemies = [];
+        let obstacles = [];
+        let bullets = [];
+        let key = null;
+        let door = null;
+        let doorOpeningAnimation = 0;
+        let finishLine = null;
+        let collectedCoins = 0;
+        let defeatedEnemies = 0;
+        let hasKey = false;
+        let hasGun = false;
+        let timer = 0;
+        let timerInterval = null;
+        let keys = {};
+        let gravity = 0.45; // Adjusted gravity for better feel
+        let gameCanvas, gameCtx, drawingCanvas, drawingCtx, confettiCanvas, confettiCtx;
+        let isDrawing = false;
+        let animationId = null;
+        let cameraX = 0;
+        let walkCycle = 0;
+        let disappearingPlatforms = [];
+        let movingPlatforms = [];
+        let spikes = [];
+        let playerMaxHealth = 100;
+        let playerCurrentHealth = playerMaxHealth;
+        let healingPotions = [];
+        let spikeBalls = [];
+        let flyingEnemies = [];
+        let checkpoint = null; // Stores player state at checkpoint
+        let playerName = '';
+        let gameStartTime = 0;
+        let gameEndTime = 0;
+        let playerDirection = 1; // 1 for right, -1 for left
+        let jumpParticles = [];
+        let boss = null;
+        let bossBullets = [];
+        let bossHitFlash = 0; // Timer for boss hit animation
+        let fallingSpikes = []; // For Level 5 hazard
+
+
+        // Level Background Colors (Sky, Ground)
+        const levelBackgrounds = {
+            1: { sky: '#87CEEB', ground: '#98D8E8' },
+            2: { sky: '#A9CCE3', ground: '#AED6F1' },
+            3: { sky: '#CACFD2', ground: '#D5DBDB' },
+            4: { sky: '#FAD7A0', ground: '#F9E795' },
+            5: { sky: '#7B241C', ground: '#900C3F' }, // Darker for boss level
+        };
+
+        // Initialize
+        window.onload = function() {
+            gameCanvas = document.getElementById('gameCanvas');
+            gameCtx = gameCanvas.getContext('2d');
+            drawingCanvas = document.getElementById('drawingCanvas');
+            drawingCtx = drawingCanvas.getContext('2d');
+            confettiCanvas = document.getElementById('confettiCanvas');
+            confettiCtx = confettiCanvas.getContext('2d');
+            
+            // Initial resize to fit the window
+            resizeCanvas();
+            
+            setupDrawing();
+            setupControls();
+            displayLeaderboard();
+
+            // Listen for window resize to adjust canvas
+            window.addEventListener('resize', resizeCanvas);
+        };
+
+        function resizeCanvas() {
+            gameCanvas.width = window.innerWidth;
+            gameCanvas.height = window.innerHeight;
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+            // When resizing, if in game, reset player to avoid falling through resized ground
+            if (gameState === 'playing' && player) {
+                // Adjust player Y to stay on ground if game canvas height changes, but avoid full level reset
+                player.y = Math.min(player.y, gameCanvas.height - 120 - player.height); // Keep player above ground level
+                // Re-initialize level elements only if the level setup itself depends on dynamic canvas size
+                // For this game, it's mostly fixed positions relative to bottom, so less critical
+            }
+        }
+
+        function promptForName() {
+            document.getElementById('nameModal').style.display = 'flex';
+            document.getElementById('nameInput').focus(); // Focus input field
+        }
+
+        // Drawing Setup
+        function setupDrawing() {
+            drawingCtx.strokeStyle = '#000';
+            drawingCtx.lineWidth = 4;
+            drawingCtx.lineCap = 'round';
+            
+            drawingCanvas.addEventListener('mousedown', startDrawing);
+            drawingCanvas.addEventListener('mousemove', draw);
+            drawingCanvas.addEventListener('mouseup', stopDrawing);
+            drawingCanvas.addEventListener('mouseout', stopDrawing);
+            
+            drawingCanvas.addEventListener('touchstart', handleTouch);
+            drawingCanvas.addEventListener('touchmove', handleTouch);
+            drawingCanvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function startDrawing(e) {
+            e.preventDefault(); // Prevent default touch behavior (like scrolling)
+            isDrawing = true;
+            const rect = drawingCanvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            drawingCtx.beginPath();
+            drawingCtx.moveTo(x, y);
+        }
+
+        function draw(e) {
+            e.preventDefault(); // Prevent default touch behavior
+            if (!isDrawing) return;
+            const rect = drawingCanvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            drawingCtx.lineTo(x, y);
+            drawingCtx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function handleTouch(e) {
+            e.preventDefault(); // Crucial for preventing scrolling while drawing
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                               e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            drawingCanvas.dispatchEvent(mouseEvent);
+        }
+
+        // Control Setup
+        function setupControls() {
+            document.addEventListener('keydown', (e) => {
+                keys[e.key] = true;
+                if (e.key === ' ' && player && player.onGround) {
+                    player.velocityY = -player.jumpPower;
+                    addJumpParticles(); // Add particles on jump
+                }
+                if ((e.key === 'x' || e.key === 'X') && hasGun && gameState === 'playing') {
+                    shoot();
+                }
+            });
+            
+            document.addEventListener('keyup', (e) => {
+                keys[e.key] = false;
+            });
+        }
+
+        // Game Functions
+        function startGame() {
+            playerName = document.getElementById('nameInput').value || 'Anonymous';
+            document.getElementById('nameModal').style.display = 'none';
+            
+            currentLevel = 1;
+            gameStartTime = Date.now();
+            document.getElementById('welcomeScreen').style.display = 'none';
+            showDrawingScreen();
+        }
+
+        function showDrawingScreen() {
+            document.getElementById('drawingArea').style.display = 'flex';
+            document.getElementById('gameCanvas').style.display = 'none';
+            document.getElementById('gameUI').style.display = 'none';
+            document.getElementById('controlsInfo').style.display = 'none';
+            drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height); // Clear drawing for new level
+            
+            const instructions = document.getElementById('drawingInstructions');
+            switch(currentLevel) {
+                case 1:
+                case 4:
+                    instructions.textContent = 'Draw a Stickman';
+                    break;
+                case 2:
+                    instructions.textContent = 'Draw a Gun';
+                    break;
+                case 3:
+                    instructions.textContent = 'Draw a Key';
+                    break;
+                case 5:
+                    instructions.textContent = 'Draw a Mighty Hero!'; // More fitting for boss level
+                    break;
+            }
+        }
+
+        function submitDrawing() {
+            document.getElementById('drawingArea').style.display = 'none';
+            document.getElementById('gameCanvas').style.display = 'block';
+            document.getElementById('gameUI').style.display = 'block';
+            document.getElementById('controlsInfo').style.display = 'block';
+            
+            initializeLevel();
+            gameState = 'playing';
+            if (animationId) cancelAnimationFrame(animationId);
+            gameLoop();
+        }
+
+        function initializeLevel() {
+            // Reset variables (important for retries/checkpoints)
+            coins = [];
+            enemies = [];
+            obstacles = [];
+            bullets = [];
+            disappearingPlatforms = [];
+            movingPlatforms = [];
+            spikes = [];
+            healingPotions = [];
+            spikeBalls = [];
+            flyingEnemies = [];
+            boss = null;
+            bossBullets = [];
+            fallingSpikes = []; // Reset falling spikes for Level 5
+
+            // Only reset these if not loading from a checkpoint
+            if (!checkpoint || checkpoint.level !== currentLevel) {
+                collectedCoins = 0;
+                defeatedEnemies = 0;
+                hasKey = false;
+                // hasGun is handled below explicitly now
+            }
+            
+            // Player health reset only if starting a new game (not retry)
+            if (gameState === 'welcome' || currentLevel === 1) { // If starting a fresh game or first level
+                playerCurrentHealth = playerMaxHealth;
+                checkpoint = null; // Clear checkpoint on new game start
+            }
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // Initialize or update player object
+            if (!player) {
+                player = {
+                    x: 150,
+                    y: gameCanvas.height - 300, // Initial spawn - will be overridden by setupLevel1
+                    width: 60,
+                    height: 100,
+                    velocityX: 0,
+                    velocityY: 0,
+                    speed: 4,
+                    jumpPower: 12,
+                    onGround: false,
+                    isMoving: false
+                };
+            } else {
+                // If retrying or continuing, set player to initial level position or checkpoint
+                if (checkpoint && checkpoint.level === currentLevel) {
+                    player.x = checkpoint.x;
+                    player.y = checkpoint.y;
+                    playerCurrentHealth = checkpoint.health; // Restore health from checkpoint
+                    collectedCoins = checkpoint.collectedCoins; // Restore collectibles from checkpoint
+                    defeatedEnemies = checkpoint.defeatedEnemies;
+                    hasKey = checkpoint.hasKey;
+                    hasGun = checkpoint.hasGun; // Restore hasGun from checkpoint
+                } else { // Reset to default start if no valid checkpoint for this level or new level
+                    player.x = 150;
+                    player.y = gameCanvas.height - 300; // Default reset, will be set precisely by level setup
+                    playerCurrentHealth = playerMaxHealth; // Full health on new level
+                    collectedCoins = 0; // Reset for new level
+                    defeatedEnemies = 0; // Reset for new level
+                    hasKey = false; // Reset for new level
+                }
+                player.velocityX = 0;
+                player.velocityY = 0;
+                player.onGround = false;
+                player.isMoving = false;
+            }
+            
+            // Setup level specific elements
+            switch(currentLevel) {
+                case 1:
+                    setupLevel1();
+                    break;
+                case 2:
+                    setupLevel2();
+                    break;
+                case 3:
+                    setupLevel3();
+                    break;
+                case 4:
+                    setupLevel4();
+                    break;
+                case 5:
+                    setupLevel5();
+                    break;
+            }
+
+            // Ensure player has gun from Level 2 onwards
+            if (currentLevel >= 2) {
+                hasGun = true;
+            }
+            
+            updateUI();
+            updateBackgroundGradient(); // Set level-specific background
+        }
+
+        function updateBackgroundGradient() {
+            const colors = levelBackgrounds[currentLevel] || levelBackgrounds[1]; // Default to level 1 colors
+            gameCanvas.style.background = `linear-gradient(to bottom, ${colors.sky} 0%, ${colors.ground} 60%, #f0f0f0 60%, #f0f0f0 100%)`;
+        }
+
+
+        // Level Setups (CRITICAL CORRECTION FOR COIN PLACEMENT IN LEVEL 1)
+        function setupLevel1() {
+            document.getElementById('checkpointsDisplay').style.display = 'block'; // Show checkpoint UI
+            checkpoint = null; // No checkpoint initially, will be set later
+
+            // Adjusted player starting position for Level 1 to be clearly on ground
+            player.x = 150;
+            player.y = gameCanvas.height - 120 - player.height; // Place player on the main ground
+
+            obstacles = [
+                {x: 0, y: gameCanvas.height - 120, width: 4000, height: 120}, // Main Ground (index 0)
+                {x: 400, y: gameCanvas.height - 250, width: 200, height: 40}, // Platform 1 (index 1)
+                {x: 700, y: gameCanvas.height - 350, width: 180, height: 40}, // Platform 2 (index 2)
+                {x: 1000, y: gameCanvas.height - 280, width: 220, height: 40}, // Platform 3 (index 3)
+                {x: 1300, y: gameCanvas.height - 380, width: 200, height: 40}, // Platform 4 (index 4)
+                {x: 1600, y: gameCanvas.height - 300, width: 250, height: 40}, // Platform 5 (index 5)
+                {x: 1900, y: gameCanvas.height - 380, width: 200, height: 40}, // Platform 6 (index 6, near checkpoint)
+                {x: 2200, y: gameCanvas.height - 300, width: 230, height: 40}, // Platform 7 (index 7)
+            ];
+            
+            coins = [
+                // Coins on top of platforms, calculating y as (platform.y - coin.height)
+                {x: 450, y: obstacles[1].y - 45, width: 45, height: 45, collected: false}, // On Platform 1
+                {x: 750, y: obstacles[2].y - 45, width: 45, height: 45, collected: false}, // On Platform 2
+                {x: 1050, y: obstacles[3].y - 45, width: 45, height: 45, collected: false}, // On Platform 3
+                {x: 1350, y: obstacles[4].y - 45, width: 45, height: 45, collected: false}, // On Platform 4
+                {x: 1680, y: obstacles[5].y - 45, width: 45, height: 45, collected: false}, // On Platform 5
+                {x: 1950, y: obstacles[6].y - 45, width: 45, height: 45, collected: false}, // On Platform 6
+                {x: 2280, y: obstacles[7].y - 45, width: 45, height: 45, collected: false}, // On Platform 7
+                // Ground coins (y: gameCanvas.height - ground_height - coin_height)
+                {x: 50, y: gameCanvas.height - 120 - 45, width: 45, height: 45, collected: false},
+                {x: 300, y: gameCanvas.height - 120 - 45, width: 45, height: 45, collected: false},
+                {x: 600, y: gameCanvas.height - 120 - 45, width: 45, height: 45, collected: false},
+                {x: 900, y: gameCanvas.height - 120 - 45, width: 45, height: 45, collected: false},
+                {x: 1200, y: gameCanvas.height - 120 - 45, width: 45, height: 45, collected: false},
+                {x: 1500, y: gameCanvas.height - 120 - 45, width: 45, height: 45, collected: false},
+                {x: 1800, y: gameCanvas.height - 120 - 45, width: 45, height: 45, collected: false},
+                {x: 2100, y: gameCanvas.height - 120 - 45, width: 45, height: 45, collected: false}
+            ];
+
+            healingPotions = [
+                {x: 850, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false},
+                {x: 2000, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false}
+            ];
+            
+            spikes = [
+                {x: 600, y: gameCanvas.height - 120 - 30, width: 100, height: 30},
+                {x: 1400, y: gameCanvas.height - 120 - 30, width: 100, height: 30}
+            ];
+
+            // Checkpoint (after a good section)
+            checkpoint = { level: 1, x: 2000, y: gameCanvas.height - 120 - player.height, health: playerMaxHealth, collectedCoins: 0, defeatedEnemies: 0, hasKey: false, hasGun: false, active: false }; // 'active' flag added
+
+            finishLine = { x: 3000, y: 0, width: 100, height: gameCanvas.height };
+            
+            document.getElementById('coinsDisplay').style.display = 'block';
+            document.getElementById('enemiesDisplay').style.display = 'none';
+            document.getElementById('timerDisplay').style.display = 'none';
+            document.getElementById('keyDisplay').style.display = 'none';
+            document.getElementById('objectiveDisplay').textContent = 'Collect 15 coins & reach the finish line!';
+        }
+
+        function setupLevel2() {
+            document.getElementById('checkpointsDisplay').style.display = 'block';
+            checkpoint = null; // Reset checkpoint for new level, will be set later
+
+            obstacles = [
+                {x: 0, y: gameCanvas.height - 120, width: 4500, height: 120},
+                {x: 300, y: gameCanvas.height - 250, width: 200, height: 40},
+                {x: 600, y: gameCanvas.height - 350, width: 180, height: 40},
+                {x: 900, y: gameCanvas.height - 280, width: 220, height: 40},
+                {x: 1200, y: gameCanvas.height - 380, width: 180, height: 40},
+                {x: 1500, y: gameCanvas.height - 300, width: 200, height: 40},
+                {x: 1800, y: gameCanvas.height - 250, width: 190, height: 40},
+                {x: 2100, y: gameCanvas.height - 380, width: 180, height: 40},
+                {x: 2400, y: gameCanvas.height - 450, width: 200, height: 40},
+                {x: 2700, y: gameCanvas.height - 320, width: 250, height: 40},
+            ];
+            
+            coins = [
+                {x: 400, y: obstacles[1].y - 45, width: 45, height: 45, collected: false}, // On platform
+                {x: 700, y: obstacles[2].y - 45, width: 45, height: 45, collected: false}, // On platform
+                {x: 1000, y: obstacles[3].y - 45, width: 45, height: 45, collected: false}, // On platform
+                {x: 1300, y: obstacles[4].y - 45, width: 45, height: 45, collected: false}, // On platform
+                {x: 1600, y: obstacles[5].y - 45, width: 45, height: 45, collected: false}, // On platform
+                {x: 1900, y: obstacles[6].y - 45, width: 45, height: 45, collected: false}, // On platform
+                {x: 2200, y: obstacles[7].y - 45, width: 45, height: 45, collected: false}, // On platform
+                {x: 2500, y: obstacles[8].y - 45, width: 45, height: 45, collected: false}, // On platform
+                {x: 2800, y: obstacles[9].y - 45, width: 45, height: 45, collected: false}, // On platform
+                {x: 2900, y: obstacles[9].y - 45, width: 45, height: 45, collected: false}  // On platform
+            ];
+
+            enemies = [
+                {x: 500, y: gameCanvas.height - 180, width: 75, height: 75, alive: true, speed: 1.0, direction: 1, moveRange: 100, startX: 500, health: 1},
+                {x: 1100, y: gameCanvas.height - 180, width: 75, height: 75, alive: true, speed: 1.2, direction: -1, moveRange: 120, startX: 1100, health: 1},
+                {x: 1700, y: gameCanvas.height - 180, width: 75, height: 75, alive: true, speed: 1.0, direction: 1, moveRange: 140, startX: 1700, health: 1},
+                {x: 2300, y: gameCanvas.height - 180, width: 75, height: 75, alive: true, speed: 1.1, direction: -1, moveRange: 100, startX: 2300, health: 1},
+                {x: 2600, y: gameCanvas.height - 180, width: 75, height: 75, alive: true, speed: 1.3, direction: 1, moveRange: 150, startX: 2600, health: 1}
+            ];
+            
+            healingPotions = [
+                {x: 100, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false},
+                {x: 1400, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false},
+            ];
+
+            spikes = [
+                {x: 800, y: gameCanvas.height - 120 - 30, width: 120, height: 30},
+                {x: 2000, y: gameCanvas.height - 120 - 30, width: 120, height: 30}
+            ];
+
+            flyingEnemies = [
+                {x: 900, y: gameCanvas.height - 550, width: 60, height: 60, alive: true, speed: 0.8, direction: 1, moveRange: 150, startX: 900, startY: gameCanvas.height - 550, moveRangeY: 50, directionY: 1, health: 1},
+                {x: 2000, y: gameCanvas.height - 500, width: 60, height: 60, alive: true, speed: 0.9, direction: -1, moveRange: 100, startX: 2000, startY: gameCanvas.height - 500, moveRangeY: 70, directionY: -1, health: 1}
+            ];
+
+            // Checkpoint (after a major obstacle)
+            checkpoint = { level: 2, x: 2000, y: gameCanvas.height - 120 - player.height, health: playerMaxHealth, collectedCoins: 0, defeatedEnemies: 0, hasKey: false, hasGun: true, active: false };
+
+            finishLine = { x: 3500, y: 0, width: 100, height: gameCanvas.height };
+            
+            document.getElementById('coinsDisplay').style.display = 'block';
+            document.getElementById('enemiesDisplay').style.display = 'block';
+            document.getElementById('timerDisplay').style.display = 'none';
+            document.getElementById('keyDisplay').style.display = 'none';
+            document.getElementById('objectiveDisplay').textContent = 'Collect 10 coins & defeat 5 enemies!';
+        }
+
+        function setupLevel3() {
+            document.getElementById('checkpointsDisplay').style.display = 'block';
+            checkpoint = null; // Reset checkpoint for new level, will be set later
+
+            obstacles = [
+                {x: 0, y: gameCanvas.height - 120, width: 3000, height: 120}, // Ground
+                {x: 300, y: gameCanvas.height - 250, width: 200, height: 40},
+                {x: 550, y: gameCanvas.height - 350, width: 220, height: 40},
+                {x: 800, y: gameCanvas.height - 450, width: 200, height: 40}, // key platform (index 3)
+                {x: 1100, y: gameCanvas.height - 280, width: 200, height: 40},
+                {x: 1350, y: gameCanvas.height - 380, width: 240, height: 40},
+                {x: 1600, y: gameCanvas.height - 300, width: 200, height: 40},
+                {x: 950, y: gameCanvas.height - 500, width: 80, height: 30} // Platform for key
+            ];
+            
+            key = { x: 870, y: obstacles[3].y - 60, width: 60, height: 60, collected: false }; // Adjusted Y for key on platform
+            
+            door = { x: 1900, y: gameCanvas.height - 420, width: 120, height: 300, locked: true };
+            
+            enemies = [
+                {x: 400, y: gameCanvas.height - 120 - 75, width: 75, height: 75, alive: true, speed: 0.8, direction: 1, moveRange: 60, startX: 400, health: 1}, // Adjusted Y to be on ground
+                {x: 1200, y: gameCanvas.height - 120 - 75, width: 75, height: 75, alive: true, speed: 1.0, direction: -1, moveRange: 80, startX: 1200, health: 1}, // Adjusted Y
+                {x: 1450, y: gameCanvas.height - 120 - 75, width: 75, height: 75, alive: true, speed: 1.0, direction: 1, moveRange: 100, startX: 1450, health: 1} // Adjusted Y
+            ];
+            
+            movingPlatforms.push(
+                {x: 650, y: gameCanvas.height - 350, width: 140, height: 40, startY: gameCanvas.height - 350, moveRangeY: 130, speed: 1.2, directionY: -1},
+                {x: 1700, y: gameCanvas.height - 450, width: 160, height: 40, startX: 1700, moveRange: 150, speed: 1.0, direction: 1} // New horizontal moving platform
+            );
+            
+            disappearingPlatforms.push(
+                {x: 1000, y: gameCanvas.height - 380, width: 120, height: 40, visible: true, timer: 0},
+                {x: 1470, y: gameCanvas.height - 430, width: 120, height: 40, visible: true, timer: 0}
+            );
+            
+            spikes = [
+                {x: 650, y: gameCanvas.height - 120 - 30, width: 80, height: 30},
+                {x: 1050, y: gameCanvas.height - 120 - 30, width: 80, height: 30},
+                {x: 1800, y: gameCanvas.height - 120 - 30, width: 100, height: 30}
+            ];
+
+            spikeBalls.push(
+                {x: 100, y: gameCanvas.height - 120 - 25, radius: 25, speed: 2, direction: 1, moveRange: 200, startX: 100}
+            );
+
+            flyingEnemies.push(
+                {x: 500, y: gameCanvas.height - 500, width: 60, height: 60, alive: true, speed: 1.0, direction: 1, moveRange: 100, startX: 500, startY: gameCanvas.height - 500, moveRangeY: 40, directionY: 1, health: 1}
+            );
+
+            // Checkpoint (after getting key)
+            checkpoint = { level: 3, x: 1500, y: gameCanvas.height - 120 - player.height, health: playerMaxHealth, collectedCoins: 0, defeatedEnemies: 0, hasKey: false, hasGun: true, active: false };
+
+            finishLine = { x: 2200, y: 0, width: 100, height: gameCanvas.height };
+            
+            document.getElementById('coinsDisplay').style.display = 'none';
+            document.getElementById('enemiesDisplay').style.display = 'block'; // Show enemy count for collision
+            document.getElementById('timerDisplay').style.display = 'none';
+            document.getElementById('keyDisplay').style.display = 'block';
+            document.getElementById('objectiveDisplay').textContent = 'Find the key, open the door, & avoid traps!';
+        }
+
+        function setupLevel4() {
+            document.getElementById('checkpointsDisplay').style.display = 'block';
+            checkpoint = null; // Reset checkpoint for new level, will be set later
+
+            timer = 35; // Reduced time for increased challenge
+            startTimer();
+            
+            obstacles = [
+                {x: 0, y: gameCanvas.height - 120, width: 4000, height: 120}, // Ground
+                {x: 250, y: gameCanvas.height - 220, width: 100, height: 40}, // P1
+                {x: 400, y: gameCanvas.height - 320, width: 80, height: 40}, // P2
+                {x: 530, y: gameCanvas.height - 420, width: 70, height: 40}, // P3
+                {x: 700, y: gameCanvas.height - 400, width: 60, height: 30}, // P4
+                {x: 820, y: gameCanvas.height - 350, width: 60, height: 30}, // P5
+                {x: 940, y: gameCanvas.height - 450, width: 60, height: 30}, // P6
+                {x: 1060, y: gameCanvas.height - 380, width: 60, height: 30}, // P7
+                {x: 1200, y: gameCanvas.height - 500, width: 40, height: 380}, // Tall obstacle 1
+                {x: 1300, y: gameCanvas.height - 500, width: 40, height: 380}, // Tall obstacle 2
+                {x: 1240, y: gameCanvas.height - 250, width: 60, height: 20}, // Platform gap 1
+                {x: 1240, y: gameCanvas.height - 350, width: 60, height: 20}, // Platform gap 2
+                {x: 1450, y: gameCanvas.height - 280, width: 70, height: 30}, // P8
+                {x: 1580, y: gameCanvas.height - 360, width: 65, height: 30}, // P9
+                {x: 1700, y: gameCanvas.height - 440, width: 60, height: 30}, // P10
+                {x: 1820, y: gameCanvas.height - 340, width: 65, height: 30}, // P11
+                {x: 1950, y: gameCanvas.height - 260, width: 70, height: 30}, // P12
+                {x: 2100, y: gameCanvas.height - 380, width: 120, height: 30}, // P13
+                {x: 2280, y: gameCanvas.height - 480, width: 100, height: 30}, // P14
+                {x: 2500, y: gameCanvas.height - 200, width: 100, height: 40}, // P15 (near end)
+                {x: 2350, y: gameCanvas.height - 120, width: 150, height: 100}, // Small ground block to jump over
+            ];
+            
+            disappearingPlatforms = [
+                {x: 350, y: gameCanvas.height - 270, width: 60, height: 30, visible: true, timer: 0},
+                {x: 460, y: gameCanvas.height - 370, width: 60, height: 30, visible: true, timer: 0},
+                {x: 760, y: gameCanvas.height - 425, width: 50, height: 30, visible: true, timer: 0},
+                {x: 1000, y: gameCanvas.height - 415, width: 50, height: 30, visible: true, timer: 0},
+                {x: 1520, y: gameCanvas.height - 320, width: 50, height: 30, visible: true, timer: 0},
+                {x: 1760, y: gameCanvas.height - 390, width: 50, height: 30, visible: true, timer: 0},
+                {x: 2040, y: gameCanvas.height - 330, width: 70, height: 30, visible: true, timer: 0},
+                {x: 2400, y: gameCanvas.height - 250, width: 80, height: 30, visible: true, timer: 0},
+                {x: 2650, y: gameCanvas.height - 300, width: 70, height: 30, visible: true, timer: 0}, // New
+                {x: 2800, y: gameCanvas.height - 400, width: 60, height: 30, visible: true, timer: 0} // New
+            ];
+            
+            movingPlatforms = [
+                {x: 650, y: gameCanvas.height - 350, width: 70, height: 30, startY: gameCanvas.height - 350, moveRangeY: 150, speed: 1.8, directionY: -1},
+                {x: 1120, y: gameCanvas.height - 300, width: 80, height: 30, startY: gameCanvas.height - 300, moveRangeY: 150, speed: 1.5, directionY: 1},
+                {x: 1380, y: gameCanvas.height - 400, width: 100, height: 30, startX: 1380, moveRange: 120, speed: 1.3, direction: 1},
+                {x: 2000, y: gameCanvas.height - 380, width: 90, height: 30, startX: 2000, moveRange: 100, speed: 1.8, direction: -1},
+                {x: 2700, y: gameCanvas.height - 250, width: 100, height: 30, startX: 2700, moveRange: 80, speed: 1.5, direction: 1} // New
+            ];
+            
+            spikes = [
+                {x: 300, y: gameCanvas.height - 120 - 30, width: 60, height: 30},
+                {x: 550, y: gameCanvas.height - 120 - 30, width: 80, height: 30},
+                {x: 850, y: gameCanvas.height - 120 - 30, width: 80, height: 30},
+                {x: 1250, y: gameCanvas.height - 120 - 30, width: 100, height: 30},
+                {x: 1500, y: gameCanvas.height - 120 - 30, width: 80, height: 30},
+                {x: 1850, y: gameCanvas.height - 120 - 30, width: 100, height: 30},
+                {x: 940, y: gameCanvas.height - 480, width: 40, height: 20}, // Spike on platform
+                {x: 2150, y: gameCanvas.height - 120 - 30, width: 100, height: 30}, // New ground spikes
+                {x: 2500, y: gameCanvas.height - 120 - 30, width: 100, height: 30} // New ground spikes
+            ];
+
+            spikeBalls.push(
+                {x: 600, y: gameCanvas.height - 120 - 25, radius: 25, speed: 2.5, direction: 1, moveRange: 150, startX: 600},
+                {x: 1600, y: gameCanvas.height - 120 - 25, radius: 25, speed: 2.8, direction: -1, moveRange: 180, startX: 1600},
+                {x: 2200, y: gameCanvas.height - 120 - 25, radius: 25, speed: 2.0, direction: 1, moveRange: 100, startX: 2200} // New
+            );
+
+            healingPotions = [
+                {x: 100, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false},
+                {x: 1900, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false},
+                {x: 2600, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false} // New
+            ];
+
+            flyingEnemies.push(
+                {x: 500, y: gameCanvas.height - 550, width: 60, height: 60, alive: true, speed: 1.2, direction: 1, moveRange: 100, startX: 500, startY: gameCanvas.height - 550, moveRangeY: 40, directionY: 1, health: 1},
+                {x: 1050, y: gameCanvas.height - 600, width: 60, height: 60, alive: true, speed: 1.0, direction: -1, moveRange: 80, startX: 1050, startY: gameCanvas.height - 600, moveRangeY: 60, directionY: -1, health: 1},
+                {x: 1750, y: gameCanvas.height - 500, width: 60, height: 60, alive: true, speed: 1.3, direction: 1, moveRange: 120, startX: 1750, startY: gameCanvas.height - 500, moveRangeY: 50, directionY: 1, health: 1} // New
+            );
+
+            // Checkpoint (after a major jump sequence)
+            checkpoint = { level: 4, x: 2000, y: gameCanvas.height - 120 - player.height, health: playerMaxHealth, collectedCoins: 0, defeatedEnemies: 0, hasKey: false, hasGun: true, active: false };
+            
+            finishLine = { x: 2800, y: 0, width: 100, height: gameCanvas.height }; // Moved closer for timer challenge
+            
+            document.getElementById('coinsDisplay').style.display = 'none';
+            document.getElementById('enemiesDisplay').style.display = 'none';
+            document.getElementById('timerDisplay').style.display = 'block';
+            document.getElementById('keyDisplay').style.display = 'none';
+            document.getElementById('objectiveDisplay').textContent = 'Race to the finish in 35 seconds!';
+        }
+        
+        function setupLevel5() {
+            document.getElementById('checkpointsDisplay').style.display = 'none'; // No checkpoint in boss level
+
+            // Significantly expanded arena width for boss fight
+            obstacles = [
+                {x: 0, y: gameCanvas.height - 120, width: 5000, height: 120}, // Main Ground, extended
+                {x: 400, y: gameCanvas.height - 280, width: 250, height: 40}, // Left platform
+                {x: 1000, y: gameCanvas.height - 400, width: 200, height: 40}, // Middle platform 1
+                {x: 1800, y: gameCanvas.height - 350, width: 280, height: 40}, // Right platform
+                {x: 2500, y: gameCanvas.height - 250, width: 180, height: 40}, // Far right platform
+                {x: 3000, y: gameCanvas.height - 450, width: 150, height: 40}, // Higher platform
+                {x: 3500, y: gameCanvas.height - 300, width: 200, height: 40} // Another platform
+            ];
+            
+            // Boss setup (large enemy)
+            boss = {
+                x: 1500, // Central starting position for boss
+                y: gameCanvas.height - 450,
+                width: 180, // Larger boss
+                height: 180,
+                alive: true,
+                speed: 1.0, // Boss movement speed
+                direction: 1,
+                moveRange: 700, // Very large movement range
+                startX: 1500,
+                health: 20, // Boss health increased for longer fight
+                shootTimer: 0,
+                shootInterval: 45, // Boss shoots more frequently (every 45 frames)
+                lastFallingSpikeTime: 0, // Timer for falling spikes
+                fallingSpikeInterval: 120 // How often spikes fall (every 2 seconds)
+            };
+            enemies = [boss]; // Boss is the only "enemy" for this level, replacing normal enemies
+
+            // Dynamic elements for the boss arena
+            movingPlatforms = [
+                {x: 700, y: gameCanvas.height - 500, width: 120, height: 30, startY: gameCanvas.height - 500, moveRangeY: 100, speed: 1.5, directionY: 1},
+                {x: 1300, y: gameCanvas.height - 200, width: 150, height: 30, startX: 1300, moveRange: 200, speed: 1.2, direction: -1},
+                {x: 2200, y: gameCanvas.height - 400, width: 100, height: 30, startY: gameCanvas.height - 400, moveRangeY: 80, speed: 1.0, directionY: -1},
+                {x: 2800, y: gameCanvas.height - 200, width: 130, height: 30, startX: 2800, moveRange: 150, speed: 1.6, direction: 1}
+            ];
+
+            disappearingPlatforms = [
+                {x: 500, y: gameCanvas.height - 350, width: 100, height: 30, visible: true, timer: 0},
+                {x: 1600, y: gameCanvas.height - 500, width: 100, height: 30, visible: true, timer: 0},
+                {x: 2300, y: gameCanvas.height - 300, width: 120, height: 30, visible: true, timer: 0},
+                {x: 3300, y: gameCanvas.height - 350, width: 90, height: 30, visible: true, timer: 0}
+            ];
+            
+            // Healing potions in strategic locations
+            healingPotions = [
+                {x: 200, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false}, // Start area
+                {x: 1100, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false}, // Mid-ground
+                {x: 2000, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false}, // Further mid-ground
+                {x: 3600, y: gameCanvas.height - 120 - 40, width: 40, height: 40, collected: false} // Near end
+            ];
+            
+            spikes = []; // No static spikes, focus on falling ones
+            spikeBalls = [];
+            flyingEnemies = [];
+            fallingSpikes = []; // Ensure empty initially
+            
+            
+            
+            document.getElementById('coinsDisplay').style.display = 'none';
+            document.getElementById('enemiesDisplay').style.display = 'block'; // Display boss health
+            document.getElementById('timerDisplay').style.display = 'none';
+            document.getElementById('keyDisplay').style.display = 'none';
+            document.getElementById('objectiveDisplay').textContent = 'Defeat the Mighty Boss!';
+            document.getElementById('enemiesDisplay').textContent = `Boss Health: ${boss.health}`;
+        }
+
+        function updateUI() {
+            document.getElementById('levelDisplay').textContent = `Level: ${currentLevel}`;
+            document.getElementById('healthBar').style.width = `${(playerCurrentHealth / playerMaxHealth) * 100}%`;
+            document.getElementById('healthBar').style.backgroundColor = playerCurrentHealth > playerMaxHealth / 2 ? '#2ecc71' : (playerCurrentHealth > playerMaxHealth / 4 ? '#f1c40f' : '#e74c3c'); // Color changes with health
+            
+            if (document.getElementById('coinsDisplay').style.display !== 'none') {
+                const totalCoins = (currentLevel === 1) ? 15 : ((currentLevel === 2) ? 10 : 0); // Define total coins per level
+                document.getElementById('coinsDisplay').textContent = `Coins: ${collectedCoins}/${totalCoins}`;
+            }
+            
+            if (currentLevel === 5 && boss) {
+                document.getElementById('enemiesDisplay').textContent = `Boss Health: ${boss.health}`;
+                document.getElementById('enemiesDisplay').style.display = 'block';
+            } else if (currentLevel === 2) {
+                // Count active ground and flying enemies for Level 2
+                const remainingEnemies = enemies.filter(e => e.alive && e !== boss).length + flyingEnemies.filter(e => e.alive).length;
+                document.getElementById('enemiesDisplay').textContent = `Enemies Left: ${remainingEnemies}`;
+                document.getElementById('enemiesDisplay').style.display = 'block';
+            } else if (currentLevel === 3) { // Only show enemy count for Level 3 if there are enemies
+                const remainingEnemies = enemies.filter(e => e.alive && e !== boss).length + flyingEnemies.filter(e => e.alive).length;
+                document.getElementById('enemiesDisplay').textContent = `Enemies Left: ${remainingEnemies}`;
+                document.getElementById('enemiesDisplay').style.display = 'block';
+            } else {
+                document.getElementById('enemiesDisplay').style.display = 'none';
+            }
+            
+            if (document.getElementById('timerDisplay').style.display !== 'none') {
+                document.getElementById('timerDisplay').textContent = `Time: ${timer}s`;
+            }
+            
+            if (document.getElementById('keyDisplay').style.display !== 'none') {
+                document.getElementById('keyDisplay').textContent = hasKey ? 'Key: Found! 🔑' : 'Key: Not Found';
+                document.getElementById('keyDisplay').style.color = hasKey ? '#2ecc71' : '#ecf0f1';
+            }
+
+            // Update checkpoint display based on its active status
+            const checkpointDisplay = document.getElementById('checkpointsDisplay');
+            if (checkpoint && checkpoint.level === currentLevel && checkpoint.active) {
+                checkpointDisplay.textContent = `Checkpoint: Active!`;
+                checkpointDisplay.style.color = '#2ecc71';
+                checkpointDisplay.style.display = 'block';
+            } else if (currentLevel !== 5) { // Hide checkpoint display for boss level as it has none
+                checkpointDisplay.textContent = `Checkpoint: None`;
+                checkpointDisplay.style.color = '#ecf0f1';
+                checkpointDisplay.style.display = 'block';
+            } else {
+                checkpointDisplay.style.display = 'none';
+            }
+        }
+
+        function takeDamage(amount) {
+            playerCurrentHealth -= amount;
+            if (playerCurrentHealth <= 0) {
+                playerCurrentHealth = 0;
+                levelFailed('health');
+            }
+            updateUI();
+        }
+
+        function healPlayer(amount) {
+            playerCurrentHealth += amount;
+            if (playerCurrentHealth > playerMaxHealth) {
+                playerCurrentHealth = playerMaxHealth;
+            }
+            updateUI();
+        }
+
+        function setCheckpoint() {
+            // Only set if not already active
+            if (checkpoint && checkpoint.level === currentLevel && checkpoint.active) return;
+
+            checkpoint = {
+                level: currentLevel,
+                x: player.x,
+                y: player.y,
+                health: playerCurrentHealth,
+                collectedCoins: collectedCoins,
+                defeatedEnemies: defeatedEnemies, // Note: This will save count, not individual enemy state
+                hasKey: hasKey,
+                hasGun: hasGun,
+                active: true // Mark as active
+            };
+            updateUI(); // Update checkpoint status in UI
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval); // Clear any existing timer
+            timerInterval = setInterval(() => {
+                timer--;
+                updateUI();
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    levelFailed('timeout');
+                }
+            }, 1000);
+        }
+
+        function shoot() {
+            if (!hasGun) return;
+            
+            bullets.push({
+                x: player.x + (playerDirection === 1 ? player.width : -20), // Bullet starts at player's edge
+                y: player.y + player.height / 2 - 5, // Align with "hand"
+                width: 20,
+                height: 10,
+                speed: 15, // Increased bullet speed
+                direction: playerDirection // Bullet direction matches player direction
+            });
+        }
+
+        // Particle System for jumps
+        function addJumpParticles() {
+            for (let i = 0; i < 10; i++) {
+                jumpParticles.push({
+                    x: player.x + player.width / 2 + (Math.random() - 0.5) * player.width,
+                    y: player.y + player.height - 5,
+                    vx: (Math.random() - 0.5) * 3,
+                    vy: Math.random() * -3,
+                    radius: Math.random() * 3 + 1,
+                    alpha: 1,
+                    color: '#fff'
+                });
+            }
+        }
+
+        function updateParticles() {
+            for (let i = jumpParticles.length - 1; i >= 0; i--) {
+                let p = jumpParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += gravity / 2; // Particles are also affected by gravity
+                p.alpha -= 0.02; // Fade out
+                p.radius *= 0.98; // Shrink
+                if (p.alpha <= 0.1 || p.radius < 0.5) {
+                    jumpParticles.splice(i, 1);
+                }
+            }
+        }
+
+        function drawParticles() {
+            for (let p of jumpParticles) {
+                gameCtx.save();
+                gameCtx.globalAlpha = p.alpha;
+                gameCtx.fillStyle = p.color;
+                gameCtx.beginPath();
+                gameCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                gameCtx.fill();
+                gameCtx.restore();
+            }
+        }
+
+        // Confetti for win screen
+        let confetti = [];
+        function createConfetti() {
+            confetti = [];
+            for (let i = 0; i < 100; i++) {
+                confetti.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height - confettiCanvas.height, // Start above screen
+                    r: 5,
+                    d: Math.random() * 20 + 10, // Density/mass for varied fall speed
+                    color: `hsl(${Math.random() * 360}, 100%, 70%)`,
+                    tilt: Math.random() * 10,
+                    tiltAngle: Math.random() * Math.PI,
+                    tiltAngleSpeed: Math.random() * 0.1 + 0.05
+                });
+            }
+        }
+
+        function updateConfetti() {
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            for (let i = confetti.length - 1; i >= 0; i--) {
+                let c = confetti[i];
+                c.tiltAngle += c.tiltAngleSpeed;
+                c.y += (Math.cos(c.tiltAngle + c.d) + c.r + c.d) * 0.4; // Fall speed
+                c.x += Math.sin(c.tiltAngle) * 0.5; // Drift horizontally
+
+                confettiCtx.beginPath();
+                confettiCtx.lineWidth = c.r / 2;
+                confettiCtx.strokeStyle = c.color;
+                confettiCtx.moveTo(c.x + c.tilt + c.r, c.y);
+                confettiCtx.lineTo(c.x + c.tilt, c.y + c.d);
+                confettiCtx.stroke();
+
+                if (c.y > confettiCanvas.height) {
+                    confetti.splice(i, 1);
+                }
+            }
+            if (confetti.length > 0) {
+                requestAnimationFrame(updateConfetti);
+            }
+        }
+
+        // Game Loop
+        function gameLoop() {
+            if (gameState !== 'playing') {
+                if (confetti.length > 0) updateConfetti(); // Keep confetti animating on win screen
+                return;
+            }
+            
+            // Clear canvas
+            gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+            
+            // Update
+            updatePlayer();
+            updateEnemies();
+            updateBullets();
+            updateMovingPlatforms();
+            updateDisappearingPlatforms();
+            updateSpikeBalls();
+            updateFlyingEnemies();
+            updateBoss();
+            updateBossBullets();
+            updateFallingSpikes(); // New update for falling spikes
+            updateParticles();
+            updateCamera();
+            
+            // Draw
+            gameCtx.save();
+            gameCtx.translate(-cameraX, 0);
+            
+            // Draw background (parallax scrolling for sky and ground)
+            drawBackgroundParallax();
+            drawObstacles();
+            drawDisappearingPlatforms();
+            drawMovingPlatforms();
+            drawSpikes();
+            drawSpikeBalls();
+            drawCoins();
+            drawHealingPotions();
+            drawEnemies(); // Draws normal enemies and the boss
+            drawFlyingEnemies();
+            drawKey();
+            drawDoor();
+            drawFinishLine();
+            drawBullets();
+            drawBossBullets();
+            drawFallingSpikes(); // New draw for falling spikes
+            drawPlayer(); // Draw player last to be on top
+            drawParticles(); // Draw particles over player
+            
+            gameCtx.restore();
+            
+            // Check win/lose conditions
+            checkCollisions();
+            checkLevelComplete();
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function drawBackgroundParallax() {
+            const colors = levelBackgrounds[currentLevel] || levelBackgrounds[1];
+
+            // Sky
+            gameCtx.fillStyle = colors.sky;
+            gameCtx.fillRect(cameraX, 0, gameCanvas.width, gameCanvas.height * 0.6);
+
+            // Ground part of background
+            gameCtx.fillStyle = colors.ground;
+            gameCtx.fillRect(cameraX, gameCanvas.height * 0.6, gameCanvas.width, gameCanvas.height * 0.4);
+
+            // Draw clouds (parallax: slower than camera)
+            gameCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            for (let i = 0; i < 15; i++) { // More clouds
+                const cloudOffset = (i * 300 - cameraX * 0.15) % (gameCanvas.width + 200); // Slower parallax for clouds
+                const y = 50 + Math.sin(i * 0.8 + Date.now() * 0.0001) * 30; // Varied and slightly animated Y
+                
+                gameCtx.beginPath();
+                gameCtx.arc(cloudOffset, y, 35, 0, Math.PI * 2);
+                gameCtx.arc(cloudOffset + 25, y, 45, 0, Math.PI * 2);
+                gameCtx.arc(cloudOffset + 55, y, 38, 0, Math.PI * 2);
+                gameCtx.fill();
+            }
+        }
+
+        function updatePlayer() {
+            player.velocityY += gravity;
+            
+            player.isMoving = false;
+            if (keys['ArrowLeft']) {
+                player.velocityX = -player.speed;
+                player.isMoving = true;
+                playerDirection = -1;
+                if (player.onGround) walkCycle -= 0.15; // Faster walk animation
+            } else if (keys['ArrowRight']) {
+                player.velocityX = player.speed;
+                player.isMoving = true;
+                playerDirection = 1;
+                if (player.onGround) walkCycle += 0.15; // Faster walk animation
+            } else {
+                player.velocityX *= 0.85;
+            }
+            
+            player.x += player.velocityX;
+            player.y += player.velocityY;
+            
+            player.onGround = false;
+            
+            const allSolidObjects = [
+                ...obstacles,
+                ...movingPlatforms.filter(p => true),
+                ...disappearingPlatforms.filter(p => p.visible)
+            ];
+
+            for (let obj of allSolidObjects) {
+                if (player.x < obj.x + obj.width &&
+                    player.x + player.width > obj.x &&
+                    player.y < obj.y + obj.height &&
+                    player.y + player.height > obj.y) {
+                    
+                    const prevPlayerY = player.y - player.velocityY; // Player's Y before this update
+                    
+                    if (player.velocityY > 0 && prevPlayerY + player.height <= obj.y) { // Falling and hit top
+                        player.y = obj.y - player.height;
+                        player.velocityY = 0;
+                        player.onGround = true;
+                        
+                        if (obj.hasOwnProperty('moveRange')) { // Horizontal moving platform
+                            player.x += obj.speed * obj.direction;
+                        } else if (obj.hasOwnProperty('moveRangeY')) { // Vertical moving platform
+                            player.y += obj.speed * obj.directionY;
+                        }
+                        
+                        if (obj.hasOwnProperty('timer')) {
+                            obj.timer = 60; // Start disappearing
+                        }
+                    } else if (player.velocityY < 0 && prevPlayerY >= obj.y + obj.height) { // Jumping and hit bottom
+                        player.y = obj.y + obj.height;
+                        player.velocityY = 0;
+                    } else if (player.velocityX > 0) { // Moving right and hit left side
+                        player.x = obj.x - player.width;
+                        player.velocityX = 0;
+                    } else if (player.velocityX < 0) { // Moving left and hit right side
+                        player.x = obj.x + obj.width;
+                        player.velocityX = 0;
+                    }
+                }
+            }
+            
+            // Damage from spikes (static)
+            for (let spike of spikes) {
+                if (player.x < spike.x + spike.width && player.x + player.width > spike.x &&
+                    player.y < spike.y + spike.height && player.y + player.height > spike.y) {
+                    takeDamage(1); // Small damage per frame
+                }
+            }
+            // Damage from falling spikes
+            for (let spike of fallingSpikes) {
+                if (!spike.alive) continue;
+                if (player.x < spike.x + spike.width && player.x + player.width > spike.x &&
+                    player.y < spike.y + spike.height && player.y + player.height > spike.y) {
+                    takeDamage(5); // More damage from falling spikes
+                    spike.alive = false; // Remove after hitting player
+                }
+            }
+
+
+            // Damage from spike balls
+            for (let ball of spikeBalls) {
+                // Simplified AABB to circle collision check for initial broad phase
+                if (player.x < ball.x + ball.radius && player.x + player.width > ball.x - ball.radius &&
+                    player.y < ball.y + ball.radius && player.y + player.height > ball.y - ball.radius) {
+                    // More accurate circle-rectangle collision check
+                    const closestX = Math.max(ball.x - ball.radius, Math.min(player.x + player.width/2, ball.x + ball.radius));
+                    const closestY = Math.max(ball.y - ball.radius, Math.min(player.y + player.height/2, ball.y + ball.radius));
+                    const distX = player.x + player.width/2 - closestX;
+                    const distY = player.y + player.height/2 - closestY;
+                    const distanceSquared = (distX * distX) + (distY * distY);
+
+                    if (distanceSquared < (ball.radius * ball.radius)) {
+                        takeDamage(1);
+                    }
+                }
+            }
+
+            // Damage from flying enemies
+            for (let enemy of flyingEnemies) {
+                if (!enemy.alive) continue;
+                if (player.x < enemy.x + enemy.width && player.x + player.width > enemy.x &&
+                    player.y < enemy.y + enemy.height && player.y + enemy.height > enemy.y) {
+                    takeDamage(1);
+                }
+            }
+
+            // Damage from regular enemies
+            for (let enemy of enemies) {
+                if (!enemy.alive || enemy === boss) continue; // Boss handled separately
+                if (player.x < enemy.x + enemy.width && player.x + player.width > enemy.x &&
+                    player.y < enemy.y + enemy.height && player.y + player.height > enemy.y) {
+                    takeDamage(1);
+                }
+            }
+
+            // Player takes damage from boss bullets
+            for (let i = bossBullets.length - 1; i >= 0; i--) {
+                let b = bossBullets[i];
+                if (player.x < b.x + b.width && player.x + player.width > b.x &&
+                    player.y < b.y + b.height && player.y + player.height > b.y) {
+                    takeDamage(10); // More damage from boss bullets
+                    bossBullets.splice(i, 1);
+                }
+            }
+
+            // Collect healing potions
+            for (let i = healingPotions.length - 1; i >= 0; i--) {
+                let potion = healingPotions[i];
+                if (!potion.collected && player.x < potion.x + potion.width && player.x + player.width > potion.x &&
+                    player.y < potion.y + potion.height && player.y + player.height > potion.y) {
+                    potion.collected = true;
+                    healPlayer(25); // Heal 25 health
+                    healingPotions.splice(i, 1); // Remove collected potion
+                }
+            }
+
+            // Checkpoint activation zones (simplified for example, can be specific objects)
+            if (currentLevel === 1 && player.x > 2000 && (!checkpoint || !checkpoint.active)) {
+                setCheckpoint();
+            }
+            if (currentLevel === 2 && player.x > 1500 && (!checkpoint || !checkpoint.active)) {
+                setCheckpoint();
+            }
+            if (currentLevel === 3 && player.x > 1000 && hasKey && (!checkpoint || !checkpoint.active)) { // Checkpoint after getting key
+                 setCheckpoint();
+            }
+            if (currentLevel === 4 && player.x > 1800 && (!checkpoint || !checkpoint.active)) {
+                setCheckpoint();
+            }
+
+            // Fall off map
+            if (player.y > gameCanvas.height + 100) {
+                levelFailed('fall');
+            }
+        }
+
+        function updateEnemies() {
+            for (let enemy of enemies) {
+                if (!enemy.alive || enemy === boss) continue;
+                
+                enemy.x += enemy.speed * enemy.direction;
+                
+                if (Math.abs(enemy.x - enemy.startX) > enemy.moveRange) {
+                    enemy.direction *= -1;
+                }
+            }
+        }
+
+        function updateBullets() {
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                bullets[i].x += bullets[i].speed * bullets[i].direction;
+                
+                if (bullets[i].x > cameraX + gameCanvas.width || bullets[i].x < cameraX - 20) {
+                    bullets.splice(i, 1);
+                } else if (currentLevel === 5 && boss && boss.alive) { // Bullet hits boss
+                    if (bullets[i].x < boss.x + boss.width && bullets[i].x + bullets[i].width > boss.x &&
+                        bullets[i].y < boss.y + boss.height && bullets[i].y + bullets[i].height > boss.y) {
+                        boss.health--;
+                        bossHitFlash = 10; // Start flash animation
+                        bullets.splice(i, 1);
+                        if (boss.health <= 0) {
+                            boss.alive = false;
+                        }
+                        updateUI();
+                    }
+                }
+            }
+        }
+
+        function updateMovingPlatforms() {
+            for (let platform of movingPlatforms) {
+                if (platform.moveRange) {
+                    platform.x += platform.speed * platform.direction;
+                    if (Math.abs(platform.x - platform.startX) > platform.moveRange) {
+                        platform.direction *= -1;
+                    }
+                }
+                
+                if (platform.moveRangeY) {
+                    platform.y += platform.speed * platform.directionY;
+                    if (Math.abs(platform.y - platform.startY) > platform.moveRangeY) {
+                        platform.directionY *= -1;
+                    }
+                }
+            }
+        }
+
+        function updateDisappearingPlatforms() {
+            for (let platform of disappearingPlatforms) {
+                if (platform.timer > 0) {
+                    platform.timer--;
+                    if (platform.timer <= 0) {
+                        platform.visible = false;
+                        setTimeout(() => {
+                            platform.visible = true;
+                        }, 3000);
+                    }
+                }
+            }
+        }
+
+        function updateSpikeBalls() {
+            for (let ball of spikeBalls) {
+                ball.x += ball.speed * ball.direction;
+                // Bounce off boundaries of its movement range
+                if (ball.direction === 1 && ball.x > ball.startX + ball.moveRange) {
+                    ball.direction = -1;
+                } else if (ball.direction === -1 && ball.x < ball.startX - ball.moveRange) {
+                    ball.direction = 1;
+                }
+            }
+        }
+
+        function updateFlyingEnemies() {
+            for (let enemy of flyingEnemies) {
+                if (!enemy.alive) continue;
+                enemy.x += enemy.speed * enemy.direction;
+                enemy.y += enemy.speed * enemy.directionY * 0.5; // Slower vertical movement
+
+                if (Math.abs(enemy.x - enemy.startX) > enemy.moveRange) {
+                    enemy.direction *= -1;
+                }
+                if (Math.abs(enemy.y - enemy.startY) > enemy.moveRangeY) {
+                    enemy.directionY *= -1;
+                }
+            }
+        }
+
+        function updateBoss() {
+            if (!boss || !boss.alive) return;
+
+            // Boss horizontal movement
+            boss.x += boss.speed * boss.direction;
+            if (Math.abs(boss.x - boss.startX) > boss.moveRange) {
+                boss.direction *= -1;
+            }
+
+            // Boss shooting logic
+            boss.shootTimer++;
+            if (boss.shootTimer >= boss.shootInterval) {
+                bossShoot();
+                boss.shootTimer = 0;
+            }
+
+            // Falling spikes logic for boss level
+            if (currentLevel === 5) {
+                boss.lastFallingSpikeTime++;
+                if (boss.lastFallingSpikeTime >= boss.fallingSpikeInterval) {
+                    spawnFallingSpikes(5); // Spawn a burst of 5 spikes
+                    boss.lastFallingSpikeTime = 0;
+                }
+            }
+
+            if (bossHitFlash > 0) {
+                bossHitFlash--;
+            }
+        }
+
+        function bossShoot() {
+            if (!player) return;
+            const bulletSpeed = 7;
+            // Calculate direction towards player
+            const angle = Math.atan2(player.y + player.height / 2 - boss.y - boss.height / 2, player.x + player.width / 2 - boss.x - boss.width / 2);
+
+            bossBullets.push({
+                x: boss.x + boss.width / 2,
+                y: boss.y + boss.height / 2,
+                width: 30,
+                height: 30,
+                vx: Math.cos(angle) * bulletSpeed,
+                vy: Math.sin(angle) * bulletSpeed,
+                color: '#FF0000'
+            });
+        }
+
+        function updateBossBullets() {
+            for (let i = bossBullets.length - 1; i >= 0; i--) {
+                let bullet = bossBullets[i];
+                bullet.x += bullet.vx;
+                bullet.y += bullet.vy;
+
+                // Remove bullets that are off screen
+                if (bullet.x < cameraX - 50 || bullet.x > cameraX + gameCanvas.width + 50 ||
+                    bullet.y < -50 || bullet.y > gameCanvas.height + 50) {
+                    bossBullets.splice(i, 1);
+                }
+            }
+        }
+
+        function spawnFallingSpikes(count) {
+            for (let i = 0; i < count; i++) {
+                fallingSpikes.push({
+                    x: cameraX + Math.random() * gameCanvas.width, // Random X within current view
+                    y: -50 - Math.random() * 200, // Start above screen
+                    width: 30,
+                    height: 30,
+                    velocityY: Math.random() * 3 + 2, // Varied falling speed
+                    alive: true
+                });
+            }
+        }
+
+        function updateFallingSpikes() {
+            for (let i = fallingSpikes.length - 1; i >= 0; i--) {
+                let spike = fallingSpikes[i];
+                if (!spike.alive) { // If already hit player or out of bounds
+                    fallingSpikes.splice(i, 1);
+                    continue;
+                }
+                spike.y += spike.velocityY;
+                spike.velocityY += gravity * 0.5; // Accelerate with gravity
+
+                // Remove if off screen
+                if (spike.y > gameCanvas.height + 50) {
+                    fallingSpikes.splice(i, 1);
+                }
+            }
+        }
+
+        function drawFallingSpikes() {
+            gameCtx.fillStyle = '#e74c3c';
+            for (let spike of fallingSpikes) {
+                if (!spike.alive) continue;
+                // Draw triangular spikes
+                gameCtx.beginPath();
+                gameCtx.moveTo(spike.x, spike.y);
+                gameCtx.lineTo(spike.x + spike.width / 2, spike.y + spike.height);
+                gameCtx.lineTo(spike.x - spike.width / 2, spike.y + spike.height);
+                gameCtx.closePath();
+                gameCtx.fill();
+                
+                gameCtx.strokeStyle = '#c0392b';
+                gameCtx.lineWidth = 1;
+                gameCtx.stroke();
+            }
+        }
+
+        function updateCamera() {
+            const targetCameraX = player.x - gameCanvas.width / 2;
+            cameraX += (targetCameraX - cameraX) * 0.08; // Smoother camera movement
+            cameraX = Math.max(0, cameraX); // Don't go left of map start
+            // Limit camera to the right edge of the level
+            const levelWidth = obstacles[0] ? obstacles[0].width : 4000; // Assuming first obstacle is always the ground
+            cameraX = Math.min(cameraX, levelWidth - gameCanvas.width);
+        }
+
+        function drawPlayer() {
+            gameCtx.strokeStyle = '#2c3e50';
+            gameCtx.lineWidth = 4;
+            
+            const centerX = player.x + player.width/2;
+            const headY = player.y + 20;
+            
+            // Head
+            gameCtx.beginPath();
+            gameCtx.arc(centerX, headY, 20, 0, Math.PI * 2);
+            gameCtx.stroke();
+            gameCtx.fillStyle = '#fff';
+            gameCtx.fill();
+            
+            // Body
+            gameCtx.strokeStyle = '#2c3e50';
+            gameCtx.beginPath();
+            gameCtx.moveTo(centerX, headY + 20);
+            gameCtx.lineTo(centerX, player.y + 70);
+            gameCtx.stroke();
+            
+            // Arms
+            gameCtx.beginPath();
+            if (player.isMoving && player.onGround) {
+                gameCtx.moveTo(centerX, player.y + 40);
+                gameCtx.lineTo(centerX + (playerDirection * 15) + Math.sin(walkCycle * 2) * 10, player.y + 60); // More pronounced swing
+                gameCtx.moveTo(centerX, player.y + 40);
+                gameCtx.lineTo(centerX - (playerDirection * 15) - Math.sin(walkCycle * 2) * 10, player.y + 60);
+            } else if (!player.onGround) { // Jumping/Falling pose
+                gameCtx.moveTo(centerX, player.y + 40);
+                gameCtx.lineTo(centerX + (playerDirection * 10), player.y + 50); // Arms out slightly
+            } else { // Standing
+                gameCtx.moveTo(player.x + 8, player.y + 40);
+                gameCtx.lineTo(player.x + player.width - 8, player.y + 40);
+            }
+            gameCtx.stroke();
+            
+            // Legs with walking animation
+            gameCtx.beginPath();
+            if (player.isMoving && player.onGround) {
+                const legOffset = Math.sin(walkCycle) * 15;
+                gameCtx.moveTo(centerX, player.y + 70);
+                gameCtx.lineTo(centerX + 12 + legOffset, player.y + player.height);
+                gameCtx.moveTo(centerX, player.y + 70);
+                gameCtx.lineTo(centerX - 12 - legOffset, player.y + player.height);
+            } else if (!player.onGround) { // Jumping pose
+                gameCtx.moveTo(centerX, player.y + 70);
+                gameCtx.lineTo(centerX + (playerDirection * 8), player.y + player.height - 10);
+                gameCtx.moveTo(centerX, player.y + 70);
+                gameCtx.lineTo(centerX - (playerDirection * 8), player.y + player.height - 10);
+            } else { // Standing pose
+                gameCtx.moveTo(centerX, player.y + 70);
+                gameCtx.lineTo(centerX + 12, player.y + player.height);
+                gameCtx.moveTo(centerX, player.y + 70);
+                gameCtx.lineTo(centerX - 12, player.y + player.height);
+            }
+            gameCtx.stroke();
+            
+            // Draw gun if equipped, adjust position based on player direction
+            if (hasGun) {
+                gameCtx.fillStyle = '#34495e';
+                if (playerDirection === 1) { // Facing right
+                    gameCtx.fillRect(player.x + player.width - 5, player.y + 35, 30, 12);
+                    gameCtx.fillRect(player.x + player.width + 20, player.y + 32, 8, 18);
+                } else { // Facing left
+                    gameCtx.fillRect(player.x - 25, player.y + 35, 30, 12);
+                    gameCtx.fillRect(player.x - 30, player.y + 32, 8, 18);
+                }
+            }
+        }
+
+        function drawObstacles() {
+            for (let obstacle of obstacles) {
+                const gradient = gameCtx.createLinearGradient(0, obstacle.y, 0, obstacle.y + obstacle.height);
+                gradient.addColorStop(0, '#34495e');
+                gradient.addColorStop(1, '#2c3e50');
+                gameCtx.fillStyle = gradient;
+                gameCtx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                
+                gameCtx.strokeStyle = '#ecf0f1';
+                gameCtx.lineWidth = 2;
+                gameCtx.strokeRect(obstacle.x, obstacle.y, obstacle.width, 2);
+            }
+        }
+
+        function drawDisappearingPlatforms() {
+            for (let platform of disappearingPlatforms) {
+                if (platform.visible) {
+                    if (platform.timer > 0) {
+                        gameCtx.fillStyle = platform.timer % 10 < 5 ? '#e74c3c' : '#c0392b';
+                    } else {
+                        gameCtx.fillStyle = '#3498db';
+                    }
+                    gameCtx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                    
+                    gameCtx.strokeStyle = '#fff';
+                    gameCtx.lineWidth = 2;
+                    gameCtx.beginPath();
+                    for (let i = 0; i < platform.width; i += 15) {
+                        gameCtx.moveTo(platform.x + i, platform.y);
+                        gameCtx.lineTo(platform.x + i + 8, platform.y + platform.height);
+                    }
+                    gameCtx.stroke();
+                }
+            }
+        }
+
+        function drawMovingPlatforms() {
+            for (let platform of movingPlatforms) {
+                const gradient = gameCtx.createLinearGradient(0, platform.y, 0, platform.y + platform.height);
+                gradient.addColorStop(0, '#9b59b6');
+                gradient.addColorStop(1, '#8e44ad');
+                gameCtx.fillStyle = gradient;
+                gameCtx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                
+                gameCtx.strokeStyle = '#fff';
+                gameCtx.lineWidth = 2;
+                gameCtx.beginPath();
+                if (platform.moveRange) {
+                    const arrowY = platform.y + platform.height/2;
+                    gameCtx.moveTo(platform.x + 15, arrowY);
+                    gameCtx.lineTo(platform.x + platform.width - 15, arrowY);
+                    gameCtx.moveTo(platform.x + 15, arrowY);
+                    gameCtx.lineTo(platform.x + 20, arrowY - 4);
+                    gameCtx.moveTo(platform.x + 15, arrowY);
+                    gameCtx.lineTo(platform.x + 20, arrowY + 4);
+                    gameCtx.moveTo(platform.x + platform.width - 15, arrowY);
+                    gameCtx.lineTo(platform.x + platform.width - 20, arrowY - 4);
+                    gameCtx.moveTo(platform.x + platform.width - 15, arrowY);
+                    gameCtx.lineTo(platform.x + platform.width - 20, arrowY + 4);
+                }
+                if (platform.moveRangeY) {
+                    const arrowX = platform.x + platform.width/2;
+                    gameCtx.moveTo(arrowX, platform.y + 8);
+                    gameCtx.lineTo(arrowX, platform.y + platform.height - 8);
+                }
+                gameCtx.stroke();
+            }
+        }
+
+        function drawSpikes() {
+            gameCtx.fillStyle = '#e74c3c';
+            for (let spike of spikes) {
+                for (let i = 0; i < spike.width; i += 20) {
+                    gameCtx.beginPath();
+                    gameCtx.moveTo(spike.x + i, spike.y + spike.height);
+                    gameCtx.lineTo(spike.x + i + 10, spike.y);
+                    gameCtx.lineTo(spike.x + i + 20, spike.y + spike.height);
+                    gameCtx.closePath();
+                    gameCtx.fill();
+                    
+                    gameCtx.strokeStyle = '#c0392b';
+                    gameCtx.lineWidth = 1;
+                    gameCtx.stroke();
+                }
+            }
+        }
+
+        function drawSpikeBalls() {
+            for (let ball of spikeBalls) {
+                gameCtx.fillStyle = '#607d8b'; // Dark grey/blue
+                gameCtx.strokeStyle = '#37474f'; // Even darker border
+                gameCtx.lineWidth = 2;
+
+                gameCtx.beginPath();
+                gameCtx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                gameCtx.fill();
+                gameCtx.stroke();
+
+                // Draw spikes on the ball
+                gameCtx.strokeStyle = '#424242';
+                gameCtx.lineWidth = 1.5;
+                for (let i = 0; i < 8; i++) { // 8 spikes
+                    let angle = (i / 8) * Math.PI * 2 + (Date.now() * 0.005 % (Math.PI * 2)); // Rotate spikes
+                    let spikeLength = ball.radius * 0.4;
+                    gameCtx.beginPath();
+                    gameCtx.moveTo(ball.x + Math.cos(angle) * ball.radius, ball.y + Math.sin(angle) * ball.radius);
+                    gameCtx.lineTo(ball.x + Math.cos(angle) * (ball.radius + spikeLength), ball.y + Math.sin(angle) * (ball.radius + spikeLength));
+                    gameCtx.stroke();
+                }
+            }
+        }
+
+        function drawFlyingEnemies() {
+            for (let enemy of flyingEnemies) {
+                if (!enemy.alive) continue;
+                // Body (like a simple bird or drone)
+                gameCtx.fillStyle = '#9b59b6'; // Purple
+                gameCtx.beginPath();
+                gameCtx.arc(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, enemy.width / 2, 0, Math.PI * 2);
+                gameCtx.fill();
+                gameCtx.strokeStyle = '#8e44ad';
+                gameCtx.lineWidth = 3;
+                gameCtx.stroke();
+
+                // Eyes
+                gameCtx.fillStyle = '#fff';
+                gameCtx.beginPath();
+                gameCtx.arc(enemy.x + enemy.width / 2 - 10, enemy.y + enemy.height / 2 - 10, 5, 0, Math.PI * 2);
+                gameCtx.arc(enemy.x + enemy.width / 2 + 10, enemy.y + enemy.height / 2 - 10, 5, 0, Math.PI * 2);
+                gameCtx.fill();
+                gameCtx.fillStyle = '#333';
+                gameCtx.beginPath();
+                gameCtx.arc(enemy.x + enemy.width / 2 - 10 + (enemy.direction * 2), enemy.y + enemy.height / 2 - 10, 3, 0, Math.PI * 2);
+                gameCtx.arc(enemy.x + enemy.width / 2 + 10 + (enemy.direction * 2), enemy.y + enemy.height / 2 - 10, 3, 0, Math.PI * 2);
+                gameCtx.fill();
+
+                // Wings (simple lines)
+                gameCtx.strokeStyle = '#8e44ad';
+                gameCtx.beginPath();
+                gameCtx.moveTo(enemy.x, enemy.y + enemy.height/2);
+                gameCtx.lineTo(enemy.x - 20, enemy.y + enemy.height/2 - 10 + Math.sin(Date.now() * 0.01) * 5);
+                gameCtx.moveTo(enemy.x + enemy.width, enemy.y + enemy.height/2);
+                gameCtx.lineTo(enemy.x + enemy.width + 20, enemy.y + enemy.height/2 - 10 + Math.sin(Date.now() * 0.01) * 5);
+                gameCtx.stroke();
+            }
+        }
+
+
+        function drawCoins() {
+            for (let coin of coins) {
+                if (coin.collected) continue;
+                
+                const scale = Math.abs(Math.cos(Date.now() * 0.002 + coin.x * 0.01));
+                const float = Math.sin(Date.now() * 0.002 + coin.y * 0.01) * 5; // Subtle float animation
+                
+                gameCtx.save();
+                gameCtx.translate(coin.x + coin.width/2, coin.y + coin.height/2 + float);
+                gameCtx.scale(scale, 1);
+                
+                const gradient = gameCtx.createRadialGradient(0, 0, 0, 0, 0, coin.width/2);
+                gradient.addColorStop(0, '#f1c40f');
+                gradient.addColorStop(1, '#f39c12');
+                gameCtx.fillStyle = gradient;
+                
+                gameCtx.beginPath();
+                gameCtx.arc(0, 0, coin.width/2, 0, Math.PI * 2);
+                gameCtx.fill();
+                
+                gameCtx.strokeStyle = '#d68910';
+                gameCtx.lineWidth = 2;
+                gameCtx.stroke();
+                
+                gameCtx.fillStyle = '#d68910';
+                gameCtx.font = 'bold 24px Arial';
+                gameCtx.textAlign = 'center';
+                gameCtx.textBaseline = 'middle';
+                gameCtx.fillText('$', 0, 0);
+                
+                gameCtx.restore();
+            }
+        }
+
+        function drawHealingPotions() {
+            for (let potion of healingPotions) {
+                if (potion.collected) continue;
+
+                const float = Math.sin(Date.now() * 0.003 + potion.x * 0.01) * 3; // Gentle float
+
+                gameCtx.save();
+                gameCtx.translate(potion.x + potion.width/2, potion.y + potion.height/2 + float);
+
+                // Bottle shape
+                gameCtx.fillStyle = '#e74c3c'; // Red for health
+                gameCtx.fillRect(-potion.width/4, -potion.height/2, potion.width/2, potion.height); // Bottle body
+                gameCtx.fillRect(-potion.width/8, -potion.height/2 - 5, potion.width/4, 5); // Neck
+
+                // Cross symbol
+                gameCtx.fillStyle = '#ecf0f1';
+                gameCtx.fillRect(-potion.width/8, -potion.height/4, potion.width/4, 8); // Horizontal part of cross
+                gameCtx.fillRect(-4, -potion.height/2 + 5, 8, potion.height/2 + 5); // Vertical part of cross
+
+                gameCtx.strokeStyle = '#c0392b';
+                gameCtx.lineWidth = 2;
+                gameCtx.strokeRect(-potion.width/4, -potion.height/2, potion.width/2, potion.height);
+
+                gameCtx.restore();
+            }
+        }
+
+        function drawEnemies() {
+            for (let enemy of enemies) {
+                if (!enemy.alive) continue;
+                
+                if (enemy === boss) {
+                    drawBoss(); // Draw specific boss appearance
+                    continue;
+                }
+
+                const gradient = gameCtx.createLinearGradient(enemy.x, enemy.y, enemy.x, enemy.y + enemy.height);
+                gradient.addColorStop(0, '#e74c3c');
+                gradient.addColorStop(1, '#c0392b');
+                gameCtx.fillStyle = gradient;
+                gameCtx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                
+                gameCtx.strokeStyle = '#fff';
+                gameCtx.lineWidth = 3;
+                // Eyes
+                gameCtx.beginPath();
+                gameCtx.moveTo(enemy.x + 15, enemy.y + 15);
+                gameCtx.lineTo(enemy.x + 25, enemy.y + 25);
+                gameCtx.moveTo(enemy.x + enemy.width - 15, enemy.y + 15);
+                gameCtx.lineTo(enemy.x + enemy.width - 25, enemy.y + 25);
+                gameCtx.stroke();
+                
+                // Angry mouth
+                gameCtx.beginPath();
+                gameCtx.arc(enemy.x + enemy.width/2, enemy.y + enemy.height - 20, 20, 0.2 * Math.PI, 0.8 * Math.PI);
+                gameCtx.stroke();
+            }
+        }
+
+        function drawBoss() {
+            if (!boss || !boss.alive) return;
+
+            gameCtx.save();
+            if (bossHitFlash > 0) { // Flash red when hit
+                gameCtx.fillStyle = 'rgba(255, 0, 0, 0.8)';
+            } else {
+                const gradient = gameCtx.createLinearGradient(boss.x, boss.y, boss.x, boss.y + boss.height);
+                gradient.addColorStop(0, '#8e44ad'); // Darker purple
+                gradient.addColorStop(1, '#673ab7'); // Even darker purple
+                gameCtx.fillStyle = gradient;
+            }
+            gameCtx.fillRect(boss.x, boss.y, boss.width, boss.height);
+            gameCtx.strokeStyle = '#512da8';
+            gameCtx.lineWidth = 5;
+            gameCtx.strokeRect(boss.x, boss.y, boss.width, boss.height);
+
+            // Large, glowing eyes
+            gameCtx.fillStyle = '#f1c40f'; // Yellow/orange glow
+            gameCtx.beginPath();
+            gameCtx.arc(boss.x + boss.width * 0.3, boss.y + boss.height * 0.3, 20, 0, Math.PI * 2);
+            gameCtx.arc(boss.x + boss.width * 0.7, boss.y + boss.height * 0.3, 20, 0, Math.PI * 2);
+            gameCtx.fill();
+            gameCtx.strokeStyle = '#e67e22';
+            gameCtx.lineWidth = 3;
+            gameCtx.stroke();
+
+            // Pupils
+            gameCtx.fillStyle = '#000';
+            gameCtx.beginPath();
+            gameCtx.arc(boss.x + boss.width * 0.3 + (boss.direction * 5), boss.y + boss.height * 0.3, 10, 0, Math.PI * 2);
+            gameCtx.arc(boss.x + boss.width * 0.7 + (boss.direction * 5), boss.y + boss.height * 0.3, 10, 0, Math.PI * 2);
+            gameCtx.fill();
+
+            // Angry mouth (jagged)
+            gameCtx.strokeStyle = '#c0392b';
+            gameCtx.lineWidth = 4;
+            gameCtx.beginPath();
+            gameCtx.moveTo(boss.x + boss.width * 0.2, boss.y + boss.height * 0.7);
+            gameCtx.lineTo(boss.x + boss.width * 0.35, boss.y + boss.height * 0.6);
+            gameCtx.lineTo(boss.x + boss.width * 0.5, boss.y + boss.height * 0.7);
+            gameCtx.lineTo(boss.x + boss.width * 0.65, boss.y + boss.height * 0.6);
+            gameCtx.lineTo(boss.x + boss.width * 0.8, boss.y + boss.height * 0.7);
+            gameCtx.stroke();
+
+            // Health bar for boss
+            const healthBarWidth = boss.width * 0.8;
+            const healthBarHeight = 10;
+            const healthBarX = boss.x + (boss.width - healthBarWidth) / 2;
+            const healthBarY = boss.y - 20;
+            gameCtx.fillStyle = '#c0392b'; // Red background
+            gameCtx.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+            gameCtx.fillStyle = '#2ecc71'; // Green health
+            gameCtx.fillRect(healthBarX, healthBarY, healthBarWidth * (boss.health / 20), healthBarHeight); // Boss health is 20
+            gameCtx.strokeStyle = '#fff';
+            gameCtx.lineWidth = 1;
+            gameCtx.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+            gameCtx.restore();
+        }
+
+        function drawBossBullets() {
+            for (let bullet of bossBullets) {
+                gameCtx.fillStyle = bullet.color;
+                gameCtx.beginPath();
+                gameCtx.arc(bullet.x, bullet.y, bullet.width / 2, 0, Math.PI * 2);
+                gameCtx.fill();
+                gameCtx.strokeStyle = '#880000';
+                gameCtx.lineWidth = 2;
+                gameCtx.stroke();
+            }
+        }
+
+
+        function drawKey() {
+            if (!key || key.collected) return;
+            
+            const float = Math.sin(Date.now() * 0.002) * 8;
+            
+            gameCtx.save();
+            gameCtx.translate(0, float);
+            
+            gameCtx.fillStyle = '#f1c40f';
+            gameCtx.strokeStyle = '#f39c12';
+            gameCtx.lineWidth = 2;
+            
+            // Key head
+            gameCtx.beginPath();
+            gameCtx.arc(key.x + 20, key.y + 20, 20, 0, Math.PI * 2);
+            gameCtx.fill();
+            gameCtx.stroke();
+            
+            // Key body
+            gameCtx.fillRect(key.x + 20, key.y + 20, 6, 30);
+            gameCtx.fillRect(key.x + 20, key.y + 45, 20, 6);
+            gameCtx.fillRect(key.x + 20, key.y + 53, 20, 6);
+            
+            gameCtx.restore();
+        }
+
+        function drawDoor() {
+            if (!door) return;
+            
+            if (doorOpeningAnimation > 0) {
+                doorOpeningAnimation--;
+            }
+            
+            const openAmount = door.locked ? 0 : Math.max(0, 60 - doorOpeningAnimation) / 60;
+            
+            gameCtx.save();
+            
+            gameCtx.fillStyle = '#8b6914';
+            gameCtx.fillRect(door.x - 5, door.y - 5, door.width + 10, door.height + 5);
+            
+            if (openAmount < 1) {
+                gameCtx.translate(door.x + door.width / 2, door.y + door.height / 2);
+                gameCtx.scale(1 - openAmount * 0.8, 1);
+                gameCtx.translate(-(door.x + door.width / 2), -(door.y + door.height / 2));
+                
+                gameCtx.fillStyle = door.locked ? '#654321' : '#8b7355';
+                gameCtx.fillRect(door.x, door.y, door.width, door.height);
+                
+                gameCtx.strokeStyle = '#4a3c1a';
+                gameCtx.lineWidth = 3;
+                gameCtx.strokeRect(door.x + 10, door.y + 10, door.width - 20, door.height/2 - 20);
+                gameCtx.strokeRect(door.x + 10, door.y + door.height/2 + 10, door.width - 20, door.height/2 - 20);
+                
+                gameCtx.fillStyle = '#2c3e50'; // For handle/lock
+                gameCtx.beginPath();
+                gameCtx.arc(door.x + door.width - 20, door.y + door.height/2, 8, 0, Math.PI * 2);
+                gameCtx.fill();
+                
+                gameCtx.fillStyle = '#fff';
+                gameCtx.font = 'bold 20px "Press Start 2P"';
+                gameCtx.textAlign = 'center';
+                gameCtx.textBaseline = 'middle';
+                if (!door.locked && doorOpeningAnimation > 30) {
+                    gameCtx.fillText('OPENING...', door.x + door.width/2, door.y + door.height/2);
+                } else if (door.locked) {
+                    gameCtx.fillText('LOCKED', door.x + door.width/2, door.y + door.height/2);
+                }
+            }
+            
+            gameCtx.restore();
+            
+            if (doorOpeningAnimation > 0 && doorOpeningAnimation < 60) {
+                gameCtx.fillStyle = 'rgba(241, 196, 15, ' + (doorOpeningAnimation / 60) + ')';
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i / 5) * Math.PI * 2 + doorOpeningAnimation * 0.1;
+                    const x = door.x + door.width/2 + Math.cos(angle) * 40;
+                    const y = door.y + door.height/2 + Math.sin(angle) * 40;
+                    gameCtx.beginPath();
+                    gameCtx.arc(x, y, 5, 0, Math.PI * 2);
+                    gameCtx.fill();
+                }
+            }
+        }
+
+        function drawFinishLine() {
+            const offset = (Date.now() / 150) % 40;
+            
+            for (let y = 0; y < gameCanvas.height; y += 20) {
+                for (let x = 0; x < finishLine.width; x += 20) {
+                    if ((Math.floor((y + offset) / 20) + Math.floor(x / 20)) % 2 === 0) {
+                        gameCtx.fillStyle = '#000';
+                    } else {
+                        gameCtx.fillStyle = '#fff';
+                    }
+                    gameCtx.fillRect(finishLine.x + x, y, 20, 20);
+                }
+            }
+            
+            gameCtx.save();
+            gameCtx.fillStyle = '#e74c3c';
+            gameCtx.font = 'bold 30px "Press Start 2P"';
+            gameCtx.textAlign = 'center';
+            gameCtx.translate(finishLine.x + finishLine.width/2, gameCanvas.height/2);
+            gameCtx.rotate(-Math.PI/2);
+            gameCtx.fillText('FINISH', 0, 0);
+            gameCtx.restore();
+        }
+
+        function drawBullets() {
+            for (let bullet of bullets) {
+                const gradient = gameCtx.createLinearGradient(bullet.x, bullet.y, bullet.x + bullet.width, bullet.y);
+                gradient.addColorStop(0, '#f39c12');
+                gradient.addColorStop(1, '#e74c3c');
+                gameCtx.fillStyle = gradient;
+                
+                gameCtx.beginPath();
+                gameCtx.ellipse(bullet.x + bullet.width/2, bullet.y + bullet.height/2, bullet.width/2, bullet.height/2, 0, 0, Math.PI * 2);
+                gameCtx.fill();
+                
+                gameCtx.strokeStyle = 'rgba(243, 156, 18, 0.5)';
+                gameCtx.lineWidth = 2;
+                gameCtx.beginPath();
+                gameCtx.moveTo(bullet.x - (bullet.direction * 10), bullet.y + bullet.height/2);
+                gameCtx.lineTo(bullet.x, bullet.y + bullet.height/2);
+                gameCtx.stroke();
+            }
+        }
+
+        function checkCollisions() {
+            // Coin collection
+            for (let coin of coins) {
+                if (coin.collected) continue;
+                if (player.x < coin.x + coin.width && player.x + player.width > coin.x &&
+                    player.y < coin.y + coin.height && player.y + player.height > coin.y) {
+                    coin.collected = true;
+                    collectedCoins++;
+                    updateUI();
+                }
+            }
+            
+            // Key collection
+            if (key && !key.collected) {
+                if (player.x < key.x + key.width && player.x + player.width > key.x &&
+                    player.y < key.y + key.height && player.y + player.height > key.y) {
+                    key.collected = true;
+                    hasKey = true;
+                    updateUI();
+                }
+            }
+            
+            // Door interaction (only if player is close to the door and has key)
+            if (door && hasKey && door.locked) {
+                if (player.x < door.x + door.width + 50 && player.x + player.width > door.x - 50 &&
+                    player.y < door.y + door.height && player.y + player.height > door.y) {
+                    door.locked = false;
+                    doorOpeningAnimation = 60;
+                }
+            }
+            
+            // Block player if door is locked
+            if (door && door.locked) {
+                if (player.x < door.x + door.width && player.x + player.width > door.x &&
+                    player.y < door.y + door.height && player.y + player.height > door.y) {
+                    if (player.velocityX > 0 && player.x + player.width > door.x && player.x < door.x) {
+                        player.x = door.x - player.width;
+                        player.velocityX = 0;
+                    } else if (player.velocityX < 0 && player.x < door.x + door.width && player.x + player.width > door.x + door.width) {
+                        player.x = door.x + door.width;
+                        player.velocityX = 0;
+                    }
+                }
+            }
+            
+            // Bullet collision with enemies
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                let bullet = bullets[i];
+                let hit = false; // Flag to check if bullet hit anything
+
+                // Check against ground enemies (excluding boss, which is handled in updateBullets)
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    let enemy = enemies[j];
+                    if (!enemy.alive || enemy === boss) continue; // Skip boss here
+                    if (bullet.x < enemy.x + enemy.width && bullet.x + bullet.width > enemy.x &&
+                        bullet.y < enemy.y + enemy.height && bullet.y + enemy.height > enemy.y) {
+                        enemy.health--;
+                        hit = true;
+                        if (enemy.health <= 0) {
+                            enemy.alive = false;
+                            defeatedEnemies++;
+                        }
+                        updateUI();
+                        break;  
+                    }
+                }
+                if (hit) {
+                    bullets.splice(i, 1);
+                    continue; // Go to next bullet if this one was removed
+                }
+
+                // Check against flying enemies
+                for (let j = flyingEnemies.length - 1; j >= 0; j--) {
+                    let enemy = flyingEnemies[j];
+                    if (!enemy.alive) continue;
+                    if (bullet.x < enemy.x + enemy.width && bullet.x + bullet.width > enemy.x &&
+                        bullet.y < enemy.y + enemy.height && bullet.y + enemy.height > enemy.y) {
+                        enemy.health--;
+                        hit = true;
+                        if (enemy.health <= 0) {
+                            enemy.alive = false;
+                            defeatedEnemies++;
+                        }
+                        updateUI();
+                        break;
+                    }
+                }
+                if (hit) {
+                    bullets.splice(i, 1);
+                    continue; // Go to next bullet if this one was removed
+                }
+            }
+        }
+
+        function checkLevelComplete() {
+            // Finish line check is always done, but its importance depends on the level
+            let reachedFinishLine = false;
+            if (finishLine && player.x < finishLine.x + finishLine.width &&
+                player.x + player.width > finishLine.x &&
+                player.y < finishLine.y + finishLine.height &&
+                player.y + player.height > finishLine.y) {
+                reachedFinishLine = true;
+            }
+
+            let completed = false;
+            
+            switch(currentLevel) {
+                case 1:
+                    completed = collectedCoins >= 15 && reachedFinishLine;
+                    break;
+                case 2:
+                    const totalEnemiesDefeated = enemies.filter(e => !e.alive && e !== boss).length + flyingEnemies.filter(e => !e.alive).length;
+                    completed = collectedCoins >= 10 && totalEnemiesDefeated >= 5 && reachedFinishLine;
+                    break;
+                case 3:
+                    completed = !door.locked && reachedFinishLine;
+                    break;
+                case 4:
+                    completed = timer > 0 && reachedFinishLine; // Timer is the main condition
+                    break;
+                case 5:
+                    // For Level 5 (Boss), completion is *only* defeating the boss
+                    completed = boss && !boss.alive;
+                    break;
+            }
+            
+            if (completed) {
+                levelCompleted();
+            } else if (currentLevel !== 5 && reachedFinishLine && !completed) { // Player reached finish line but objective not met (for non-boss levels)
+                showIncompleteMessage();
+            } else if (currentLevel === 5 && !completed && boss && boss.alive && reachedFinishLine) {
+                 // For boss level, if finish line is crossed but boss is alive, it's incomplete
+                 showIncompleteMessage();
+            }
+        }
+
+        function levelCompleted() {
+            gameState = 'paused';
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            document.getElementById('messageBox').style.display = 'block';
+            document.getElementById('messageTitle').textContent = 'Level Complete!';
+            document.getElementById('messageTitle').style.color = '#27ae60';
+            document.getElementById('messageText').textContent = `Excellent work on Level ${currentLevel}!`;
+            
+            if (currentLevel === 5) {
+                gameEndTime = Date.now();
+                const totalTime = (gameEndTime - gameStartTime) / 1000;
+                updateLeaderboard(playerName, totalTime);
+
+                document.getElementById('messageTitle').textContent = '🎉 Game Complete! 🎉';
+                document.getElementById('messageText').textContent = `Congratulations! You've mastered all levels in ${totalTime.toFixed(2)} seconds!`;
+                document.getElementById('continueButton').style.display = 'none';
+                document.getElementById('retryButton').style.display = 'none';
+                document.getElementById('restartButton').style.display = 'inline-block';
+                createConfetti(); // Trigger confetti animation
+                updateConfetti();
+            } else {
+                document.getElementById('continueButton').style.display = 'inline-block';
+                document.getElementById('retryButton').style.display = 'none';
+                document.getElementById('restartButton').style.display = 'none';
+            }
+        }
+
+        function levelFailed(reason = '') {
+            gameState = 'paused';
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            document.getElementById('messageBox').style.display = 'block';
+            document.getElementById('messageTitle').textContent = 'Level Failed!';
+            document.getElementById('messageTitle').style.color = '#e74c3c';
+            
+            let failMessage = '';
+            
+            if (reason === 'enemy') {
+                failMessage = 'An enemy got you! ';
+            } else if (reason === 'spike' || reason === 'health') {
+                failMessage = 'You lost all your health! Watch out for hazards!';
+            } else if (reason === 'fall') {
+                failMessage = 'You fell off the map! Be careful near edges!';
+            } else if (reason === 'timeout') {
+                failMessage = 'Time ran out! Move quickly through the obstacles!';
+            } else if (reason === 'boss') {
+                failMessage = 'The boss overwhelmed you! Try again!';
+            }
+            
+            document.getElementById('messageText').textContent = failMessage;
+            document.getElementById('continueButton').style.display = 'none';
+            document.getElementById('retryButton').style.display = 'inline-block';
+            document.getElementById('restartButton').style.display = 'none';
+        }
+
+        function showIncompleteMessage() {
+            let message = '';
+            switch(currentLevel) {
+                case 1:
+                    message = `Collect all coins first! ${collectedCoins}/15`;
+                    break;
+                case 2:
+                    const totalEnemiesRemaining = enemies.filter(e => e.alive && e !== boss).length + flyingEnemies.filter(e => e.alive).length;
+                    message = `Collect 10 coins AND defeat 5 enemies! Coins: ${collectedCoins}/10, Enemies Left: ${totalEnemiesRemaining}`;
+                    break;
+                case 3:
+                    message = hasKey ? 'Unlock the door to continue!' : 'Find the key first!';
+                    break;
+                case 4:
+                    message = `You must reach the finish line within the time limit! Time left: ${timer}s`;
+                    break;
+                case 5:
+                    message = `Defeat the Mighty Boss! Boss Health: ${boss ? boss.health : 0}`;
+                    break;
+            }
+            
+            const tempMsg = document.createElement('div');
+            tempMsg.style.position = 'absolute';
+            tempMsg.style.top = '50%';
+            tempMsg.style.left = '50%';
+            tempMsg.style.transform = 'translate(-50%, -50%)';
+            tempMsg.style.backgroundColor = 'rgba(231, 76, 60, 0.9)';
+            tempMsg.style.color = 'white';
+            tempMsg.style.padding = '30px 50px';
+            tempMsg.style.fontSize = '28px';
+            tempMsg.style.borderRadius = '10px';
+            tempMsg.style.fontWeight = 'bold';
+            tempMsg.style.zIndex = '1000';
+            tempMsg.textContent = message;
+            document.body.appendChild(tempMsg);
+            
+            // Briefly pause the game to show message, then resume
+            gameState = 'paused'; // Temporarily pause the game logic
+            setTimeout(() => {
+                if (document.body.contains(tempMsg)) {
+                    document.body.removeChild(tempMsg);
+                }
+                gameState = 'playing'; // Resume game after message
+                gameLoop(); // Re-call gameLoop to ensure it continues
+            }, 2000);
+        }
+
+        function continueGame() {
+            document.getElementById('messageBox').style.display = 'none';
+            currentLevel++;
+            checkpoint = null; // Clear checkpoint when moving to next level
+            playerCurrentHealth = playerMaxHealth; // Full health for new level
+            showDrawingScreen();
+        }
+
+        function retryLevel() {
+            document.getElementById('messageBox').style.display = 'none';
+            // If there's a checkpoint active for the current level, load from it. Otherwise, re-initialize level from start.
+            if (checkpoint && checkpoint.level === currentLevel && checkpoint.active) {
+                player.x = checkpoint.x;
+                player.y = checkpoint.y;
+                playerCurrentHealth = checkpoint.health;
+                collectedCoins = checkpoint.collectedCoins;
+                defeatedEnemies = checkpoint.defeatedEnemies;
+                hasKey = checkpoint.hasKey;
+                hasGun = checkpoint.hasGun;
+                // Re-initialize level objects (enemies, coins etc.) to their initial state for the level
+                initializeLevel(); // This recreates everything, but player state is overridden by checkpoint
+            } else { // No valid checkpoint or starting a new level
+                initializeLevel(); // This will reset player to default start of level
+            }
+            gameState = 'playing';
+            gameLoop();
+        }
+
+
+        function restartGame() {
+            // Optional: uncomment to clear leaderboard on full game restart
+            // localStorage.removeItem('doodleQuestLeaderboard'); 
+            document.getElementById('messageBox').style.display = 'none';
+            document.getElementById('welcomeScreen').style.display = 'flex';
+            displayLeaderboard();
+            // Reset all game progress for a true restart
+            currentLevel = 1;
+            playerCurrentHealth = playerMaxHealth;
+            collectedCoins = 0;
+            defeatedEnemies = 0;
+            hasKey = false;
+            hasGun = false;
+            checkpoint = null;
+            player = null; // Reset player object completely for fresh start
+        }
+
+        function getLeaderboard() {
+            const leaderboardData = localStorage.getItem('doodleQuestLeaderboard');
+            return leaderboardData ? JSON.parse(leaderboardData) : [];
+        }
+
+        function updateLeaderboard(name, time) {
+            const leaderboard = getLeaderboard();
+            leaderboard.push({ name, time });
+            leaderboard.sort((a, b) => a.time - b.time);
+            const top5 = leaderboard.slice(0, 5);
+            localStorage.setItem('doodleQuestLeaderboard', JSON.stringify(top5));
+        }
+
+        function displayLeaderboard() {
+            const leaderboard = getLeaderboard();
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
+            if (leaderboard.length === 0) {
+                leaderboardList.innerHTML = '<li>No scores yet! Be the first!</li>';
+            } else {
+                leaderboard.forEach((score, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${score.name}</span><span>${score.time.toFixed(2)}s</span>`;
+                    leaderboardList.appendChild(li);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
